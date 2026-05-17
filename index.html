@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>IKKIS KOT v2 — Order Entry</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -22,22 +22,22 @@
     --green:#2F7D4D;
     --yellow:#9B731D;
     --red:#A83232;
-    --shadow:0 24px 60px rgba(30,18,8,.10);
+    --shadow:0 18px 42px rgba(30,18,8,.08);
     --mono:'IBM Plex Mono', monospace;
     --sans:'Inter', sans-serif;
     --serif:'Cormorant Garamond', serif;
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
   body{
     background:
-      radial-gradient(circle at top left, rgba(185,94,44,.10), transparent 32rem),
+      radial-gradient(circle at top left, rgba(185,94,44,.10), transparent 30rem),
       linear-gradient(180deg,var(--cream),var(--paper));
     color:var(--brown);
     font-family:var(--sans);
     min-height:100vh;
-    padding:34px 18px 80px;
+    padding:26px 16px 90px;
   }
 
   .shell{max-width:980px;margin:0 auto}
@@ -48,12 +48,12 @@
     gap:20px;
     align-items:end;
     border-bottom:2px solid var(--brown);
-    padding-bottom:22px;
-    margin-bottom:26px;
+    padding-bottom:20px;
+    margin-bottom:22px;
   }
   .brand h1{
     font-family:var(--serif);
-    font-size:clamp(38px,7vw,72px);
+    font-size:clamp(40px,7vw,72px);
     line-height:.82;
     letter-spacing:-.035em;
     font-weight:700;
@@ -61,8 +61,8 @@
   .brand p{
     margin-top:12px;
     font-family:var(--mono);
-    font-size:11px;
-    letter-spacing:.28em;
+    font-size:10px;
+    letter-spacing:.26em;
     text-transform:uppercase;
     color:var(--muted);
   }
@@ -81,20 +81,16 @@
   .status-pill.err strong{color:var(--red)}
 
   .grid{display:grid;grid-template-columns:1.08fr .62fr;gap:24px;align-items:start}
-  .card{
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.34);
-    box-shadow:var(--shadow);
-  }
-  .card-pad{padding:26px}
+  .card{border:1px solid var(--line);background:rgba(255,255,255,.34);box-shadow:var(--shadow)}
+  .card-pad{padding:24px}
   .side{position:sticky;top:18px}
 
-  .section{margin-bottom:30px}
+  .section{margin-bottom:28px}
   .section:last-child{margin-bottom:0}
   .section-title{
     font-family:var(--mono);
     font-size:11px;
-    letter-spacing:.24em;
+    letter-spacing:.22em;
     text-transform:uppercase;
     color:var(--copper);
     margin-bottom:18px;
@@ -104,20 +100,34 @@
   }
   .section-title::after{content:"";height:1px;background:var(--line);flex:1}
 
+  /* Compact connection panel */
+  .connection-strip{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    border:1px solid var(--line-dark);
+    background:rgba(255,255,255,.45);
+    padding:11px 13px;
+    margin-bottom:18px;
+    cursor:pointer;
+  }
+  .connection-strip .left{min-width:0}
+  .connection-strip .k{font-family:var(--mono);font-size:9px;letter-spacing:.20em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .connection-strip .v{font-family:var(--mono);font-size:12px;color:var(--brown);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:650px}
+  .connection-strip .toggle{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--copper);white-space:nowrap}
   .script-box{
-    display:grid;
+    display:none;
     grid-template-columns:1fr auto auto;
     gap:10px;
     border:1px solid var(--line-dark);
     background:rgba(255,255,255,.45);
     padding:10px;
-    margin-bottom:22px;
+    margin:0 0 18px;
   }
-  .script-box input{
-    border:none;background:transparent;outline:none;
-    font-family:var(--mono);font-size:12px;color:var(--brown);
-    min-width:0;
-  }
+  .script-box.open{display:grid}
+  .script-box input{border:none;background:transparent;outline:none;font-family:var(--mono);font-size:12px;color:var(--brown);min-width:0}
+
   button,input,select,textarea{font-family:inherit}
   .mini-btn{
     border:1px solid var(--line-dark);
@@ -131,8 +141,10 @@
     cursor:pointer;
     display:inline-flex;
     align-items:center;
+    justify-content:center;
     gap:6px;
     transition:.15s ease;
+    min-height:36px;
   }
   .mini-btn:hover{border-color:var(--copper);color:var(--copper)}
   .mini-btn:disabled{opacity:.5;cursor:not-allowed}
@@ -143,8 +155,8 @@
   .source-btn{
     border:1px solid var(--line-dark);
     background:rgba(255,255,255,.24);
-    min-height:88px;
-    padding:15px 12px;
+    min-height:86px;
+    padding:15px 10px;
     cursor:pointer;
     text-align:center;
     transition:.16s ease;
@@ -159,16 +171,8 @@
   .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
   .row-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-  .field{margin-bottom:18px}
-  label{
-    display:block;
-    font-family:var(--mono);
-    font-size:10px;
-    letter-spacing:.19em;
-    text-transform:uppercase;
-    color:var(--muted);
-    margin-bottom:8px;
-  }
+  .field{margin-bottom:18px;position:relative}
+  label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
   label .req{color:var(--copper)}
   input,select,textarea{
     width:100%;
@@ -189,106 +193,67 @@
   .hint{font-size:12px;line-height:1.5;color:var(--muted);margin-top:8px}
   .hint code{background:rgba(255,255,255,.5);padding:1px 5px;font-family:var(--mono);font-size:11px}
 
-  .b2b-panel{
+  .suggestions{
+    position:absolute;
+    left:0;right:0;top:100%;
+    z-index:25;
+    background:#FAF7F2;
+    border:1px solid var(--line-dark);
+    box-shadow:0 14px 34px rgba(30,18,8,.12);
+    max-height:210px;
+    overflow:auto;
     display:none;
-    border:1px solid var(--line);
-    background:rgba(113,143,152,.10);
-    padding:18px;
-    margin-top:16px;
   }
+  .suggestions.open{display:block}
+  .suggestion-item{
+    padding:11px 13px;
+    font-family:var(--mono);
+    font-size:13px;
+    border-bottom:1px solid #EEE2D1;
+    cursor:pointer;
+  }
+  .suggestion-item:hover,.suggestion-item.active{background:#F1E5D6;color:var(--copper)}
+  .suggestion-item:last-child{border-bottom:0}
+
+  .b2b-panel{display:none;border:1px solid var(--line);background:rgba(113,143,152,.10);padding:18px;margin-top:16px}
   .b2b-panel.visible{display:block}
-  .credit-box{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:10px;
-    margin-top:14px;
-  }
-  .credit-stat{
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.5);
-    padding:12px 10px;
-  }
+  .credit-box{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  .credit-stat{border:1px solid var(--line);background:rgba(255,255,255,.5);padding:12px 10px}
   .credit-stat .v{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--brown)}
   .credit-stat .k{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin-top:5px}
-  .credit-status{
-    grid-column:1/-1;
-    padding:12px 14px;
-    border:1px solid var(--line-dark);
-    font-family:var(--mono);
-    font-size:12px;
-    letter-spacing:.04em;
-  }
+  .credit-status{grid-column:1/-1;padding:12px 14px;border:1px solid var(--line-dark);font-family:var(--mono);font-size:12px;letter-spacing:.04em}
   .credit-status.green{background:rgba(47,125,77,.10);color:var(--green);border-color:rgba(47,125,77,.30)}
   .credit-status.yellow{background:rgba(155,115,29,.12);color:var(--yellow);border-color:rgba(155,115,29,.34)}
   .credit-status.red{background:rgba(168,50,50,.11);color:var(--red);border-color:rgba(168,50,50,.36)}
 
-  .add-cafe{display:none;margin-top:16px;border-top:1px solid var(--line);padding-top:16px;background:rgba(255,255,255,.4);padding:18px;margin-left:-18px;margin-right:-18px;margin-bottom:-18px;border-bottom-left-radius:4px;border-bottom-right-radius:4px}
+  .add-cafe{display:none;margin-top:16px;border-top:1px solid var(--line);padding-top:16px;background:rgba(255,255,255,.4);padding:18px;margin-left:-18px;margin-right:-18px;margin-bottom:-18px}
   .add-cafe.visible{display:block}
   .add-cafe-title{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--copper);margin-bottom:14px}
 
-  .order-id{
-    background:var(--brown);
-    color:var(--cream);
-    padding:18px 20px;
-    display:flex;
-    justify-content:space-between;
-    gap:18px;
-    align-items:center;
-    margin-bottom:20px;
-  }
+  .order-id{background:var(--brown);color:var(--cream);padding:18px 20px;display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:20px}
   .order-id .small{font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,242,227,.45);margin-bottom:6px}
   .order-id .id{font-family:var(--mono);font-size:18px;font-weight:600;letter-spacing:.04em}
   .order-id .note{font-family:var(--mono);font-size:10px;line-height:1.45;color:rgba(255,242,227,.46);text-align:right}
 
-  .urgent{
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    border:none;
-    background:transparent;
-    color:var(--muted);
-    font-family:var(--mono);
-    font-size:11px;
-    letter-spacing:.17em;
-    text-transform:uppercase;
-    cursor:pointer;
-    padding:8px 0;
-  }
+  .urgent{display:inline-flex;align-items:center;gap:10px;border:none;background:transparent;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.17em;text-transform:uppercase;cursor:pointer;padding:8px 0}
   .checkbox{width:18px;height:18px;border:1.5px solid var(--line-dark);display:grid;place-items:center;color:#fff}
   .urgent.active{color:var(--copper)}
   .urgent.active .checkbox{background:var(--copper);border-color:var(--copper)}
 
   .items{display:flex;flex-direction:column;gap:12px}
-  .item{
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.36);
-    padding:18px;
-  }
+  .item{border:1px solid var(--line);background:rgba(255,255,255,.36);padding:18px}
   .item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
   .item-title{font-family:var(--mono);font-size:10px;letter-spacing:.20em;text-transform:uppercase;color:var(--muted)}
   .remove{border:none;background:transparent;color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
   .remove:hover{color:var(--red)}
-  .item-grid{display:grid;grid-template-columns:1.6fr .75fr .75fr;gap:14px}
-  .item-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  .item-grid{display:grid;grid-template-columns:1.55fr .7fr .7fr;gap:14px}
   .item-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px}
   .price-field{display:none}
   .is-b2b .price-field{display:block}
   .price-field input{font-weight:600}
   .price-auto-tag{display:inline-block;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--green);margin-left:6px;text-transform:uppercase}
 
-  .add-item{
-    width:100%;
-    border:1.5px dashed var(--line-dark);
-    background:transparent;
-    color:var(--muted);
-    padding:17px;
-    margin-top:14px;
-    font-family:var(--mono);
-    font-size:11px;
-    letter-spacing:.22em;
-    text-transform:uppercase;
-    cursor:pointer;
-  }
+  .add-item{width:100%;border:1.5px dashed var(--line-dark);background:transparent;color:var(--muted);padding:17px;margin-top:14px;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;cursor:pointer}
   .add-item:hover{color:var(--copper);border-color:var(--copper)}
 
   .summary-card{background:var(--brown);color:var(--cream);padding:22px;margin-bottom:18px}
@@ -300,80 +265,66 @@
   .sum-box .v{font-family:var(--mono);font-size:18px;font-weight:600}
   .sum-box .k{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.18em;color:rgba(255,242,227,.45);margin-top:5px}
 
-  .submit{
-    width:100%;
-    background:var(--copper);
-    border:none;
-    color:#fff;
-    padding:19px 18px;
-    cursor:pointer;
-    font-family:var(--mono);
-    font-weight:600;
-    font-size:12px;
-    letter-spacing:.28em;
-    text-transform:uppercase;
-    transition:.15s ease;
-  }
+  .submit{width:100%;background:var(--copper);border:none;color:#fff;padding:19px 18px;cursor:pointer;font-family:var(--mono);font-weight:600;font-size:12px;letter-spacing:.28em;text-transform:uppercase;transition:.15s ease}
   .submit:hover{background:var(--copper-dark)}
   .submit:disabled{opacity:.48;cursor:not-allowed}
   .secondary-submit{background:transparent;color:var(--brown);border:1px solid var(--line-dark);margin-top:10px}
   .secondary-submit:hover{background:rgba(30,18,8,.05)}
 
-  .toast{
-    position:fixed;
-    right:22px;bottom:22px;
-    background:var(--brown);
-    color:#fff;
-    padding:14px 18px;
-    max-width:360px;
-    font-family:var(--mono);
-    font-size:12px;
-    line-height:1.5;
-    opacity:0;
-    transform:translateY(10px);
-    transition:.2s ease;
-    z-index:50;
-  }
+  .toast{position:fixed;right:22px;bottom:22px;background:var(--brown);color:#fff;padding:14px 18px;max-width:360px;font-family:var(--mono);font-size:12px;line-height:1.5;opacity:0;transform:translateY(10px);transition:.2s ease;z-index:50}
   .toast.show{opacity:1;transform:translateY(0)}
   .toast.ok{background:var(--green)}
   .toast.err{background:var(--red)}
   .toast.warn{background:var(--yellow);color:#fff}
-
   .spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:-2px}
   .spinner-dark{border-color:rgba(30,18,8,.25);border-top-color:var(--brown)}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* Diagnostic panel for debugging */
-  .diag{
-    margin-top:14px;
-    padding:12px;
-    background:rgba(30,18,8,.05);
-    border:1px solid var(--line);
-    font-family:var(--mono);
-    font-size:11px;
-    color:var(--brown);
-    max-height:140px;
-    overflow-y:auto;
-    display:none;
-  }
-  .diag.visible{display:block}
-  .diag-line{margin:2px 0}
-  .diag-line.err{color:var(--red)}
-  .diag-line.ok{color:var(--green)}
+  .diag{margin-top:12px;padding:11px;background:rgba(30,18,8,.05);border:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--brown);max-height:120px;overflow-y:auto;display:none}
+  .diag.visible{display:block}.diag-line{margin:2px 0}.diag-line.err{color:var(--red)}.diag-line.ok{color:var(--green)}
 
   @media(max-width:860px){
-    .grid{grid-template-columns:1fr}
-    .side{position:static}
-    .topbar{grid-template-columns:1fr}
-    .status-pill{text-align:left}
+    .grid{grid-template-columns:1fr}.side{position:static}.topbar{grid-template-columns:1fr}.status-pill{text-align:left}
   }
+
   @media(max-width:620px){
-    body{padding:18px 12px 60px}
-    .card-pad{padding:19px}
-    .source-grid,.row,.row-3,.item-grid,.item-grid-2,.item-grid-3,.credit-box{grid-template-columns:1fr}
-    .script-box{grid-template-columns:1fr}
-    .summary-grid{grid-template-columns:1fr 1fr}
-    .row-actions .mini-btn{flex:1;justify-content:center}
+    body{padding:16px 10px 105px}
+    .shell{max-width:100%}
+    .topbar{gap:12px;margin-bottom:18px;padding-bottom:18px}
+    .brand h1{font-size:42px;line-height:.86}
+    .brand p{font-size:9px;letter-spacing:.22em}
+    .status-pill{min-width:0;padding:10px 12px}
+    .card-pad{padding:14px}
+    .card{box-shadow:none}
+    .connection-strip{padding:10px 11px;margin-bottom:14px}
+    .connection-strip .v{max-width:255px;font-size:10px}
+    .script-box{grid-template-columns:1fr;margin-bottom:14px}
+    .script-box input{font-size:11px;line-height:1.4}
+    .section{margin-bottom:24px}
+    .section-title{font-size:10px;margin-bottom:13px;letter-spacing:.18em}
+    .source-grid{grid-template-columns:repeat(3,1fr);gap:6px}
+    .source-btn{min-height:76px;padding:12px 4px}
+    .source-code{font-size:22px;margin-bottom:6px}
+    .source-label{font-size:7px;letter-spacing:.10em;line-height:1.45}
+    .row,.row-3,.item-grid,.item-grid-3,.credit-box{grid-template-columns:1fr}
+    .field{margin-bottom:15px}
+    label{font-size:9px;letter-spacing:.16em}
+    input,select,textarea{font-size:16px;padding:7px 0 10px}
+    .b2b-panel{padding:12px;margin-top:12px}
+    .add-cafe{margin-left:-12px;margin-right:-12px;margin-bottom:-12px;padding:14px}
+    .credit-box{gap:7px}
+    .credit-stat{padding:10px}.credit-status{font-size:11px;padding:10px}
+    .order-id{padding:14px 15px;margin-bottom:16px}.order-id .id{font-size:15px}.order-id .note{font-size:8px}
+    .item{padding:13px}.item-grid-3{margin-top:8px}.item-head{margin-bottom:10px}
+    .add-item{padding:14px;margin-top:10px}
+    .side{position:fixed;left:0;right:0;bottom:0;background:rgba(255,242,227,.96);border-top:1px solid var(--line-dark);padding:8px 10px;z-index:40;backdrop-filter:blur(10px)}
+    .summary-card{display:none}
+    .secondary-submit{display:none}
+    .submit{padding:16px 12px;font-size:11px}
+    .hint[style]{display:none}
+    .toast{left:10px;right:10px;bottom:72px;max-width:none}
+    .diag{max-height:86px;font-size:10px}
+    .row-actions .mini-btn{flex:1}
   }
 </style>
 </head>
@@ -384,16 +335,20 @@
       <h1>Ikkis Coffee Roasters</h1>
       <p>KOT v2 · Order Entry System</p>
     </div>
-    <div class="status-pill" id="connectionStatus">
-      <strong>Not connected</strong>
-      Add Web App URL
-    </div>
+    <div class="status-pill" id="connectionStatus"><strong>Connected</strong>IKKIS KOT v2 ready</div>
   </header>
 
   <div class="grid">
     <main class="card card-pad" id="formCard">
-      <div class="script-box">
-        <input id="webAppUrl" placeholder="Paste Google Apps Script Web App URL …/exec" />
+      <div class="connection-strip" onclick="toggleSettings()">
+        <div class="left">
+          <div class="k">System URL</div>
+          <div class="v" id="urlPreview">Internal Web App URL saved</div>
+        </div>
+        <div class="toggle" id="settingsToggle">Settings</div>
+      </div>
+      <div class="script-box" id="scriptBox">
+        <input id="webAppUrl" placeholder="Google Apps Script Web App URL …/exec" />
         <button class="mini-btn" onclick="saveUrl()">Save</button>
         <button class="mini-btn" id="testBtn" onclick="testConnection()">Test</button>
       </div>
@@ -402,27 +357,16 @@
       <section class="section">
         <div class="section-title">1 · Source</div>
         <div class="source-grid">
-          <button class="source-btn" id="sourceS" onclick="selectSource('S')">
-            <span class="source-code">S</span>
-            <span class="source-label">Shopify<br>B2C</span>
-          </button>
-          <button class="source-btn" id="sourceW" onclick="selectSource('W')">
-            <span class="source-code">W</span>
-            <span class="source-label">WhatsApp / Phone<br>B2C</span>
-          </button>
-          <button class="source-btn" id="sourceB" onclick="selectSource('B')">
-            <span class="source-code">B</span>
-            <span class="source-label">B2B<br>Wholesale</span>
-          </button>
+          <button class="source-btn" id="sourceS" onclick="selectSource('S')" type="button"><span class="source-code">S</span><span class="source-label">Shopify<br>B2C</span></button>
+          <button class="source-btn" id="sourceW" onclick="selectSource('W')" type="button"><span class="source-code">W</span><span class="source-label">WhatsApp / Phone<br>B2C</span></button>
+          <button class="source-btn" id="sourceB" onclick="selectSource('B')" type="button"><span class="source-code">B</span><span class="source-label">B2B<br>Wholesale</span></button>
         </div>
 
         <div class="b2b-panel" id="b2bPanel">
           <div class="row">
             <div class="field">
               <label>Café Account <span class="req">*</span></label>
-              <select id="cafeSelect" onchange="onCafeSelected()">
-                <option value="">Load cafés first…</option>
-              </select>
+              <select id="cafeSelect" onchange="onCafeSelected()"><option value="">Load cafés first…</option></select>
             </div>
             <div class="field">
               <label>Manual Café / New Café</label>
@@ -430,36 +374,31 @@
             </div>
           </div>
           <div class="row-actions">
-            <button class="mini-btn" id="loadCafesBtn" onclick="loadCafes(true)">Load Cafés</button>
-            <button class="mini-btn" id="addCafeToggleBtn" onclick="toggleAddCafe()">+ Add Café</button>
-            <button class="mini-btn" id="refreshCreditBtn" onclick="loadCredit(true)">Refresh Credit</button>
+            <button class="mini-btn" id="loadCafesBtn" onclick="loadCafes(true)" type="button">Load Cafés</button>
+            <button class="mini-btn" id="addCafeToggleBtn" onclick="toggleAddCafe()" type="button">+ Add Café</button>
+            <button class="mini-btn" id="refreshCreditBtn" onclick="loadCredit(true)" type="button">Refresh Credit</button>
           </div>
 
           <div class="add-cafe" id="addCafePanel">
             <div class="add-cafe-title">Register New Café Partner</div>
             <div class="row">
               <div class="field"><label>Café Name <span class="req">*</span></label><input id="newCafeName" placeholder="e.g. Brew House"/></div>
-              <div class="field"><label>GST Entity (Legal Name)</label><input id="newGstEntity" placeholder="e.g. Brew House Pvt Ltd"/></div>
+              <div class="field"><label>GST Entity</label><input id="newGstEntity" placeholder="Legal name"/></div>
             </div>
             <div class="row-3">
-              <div class="field"><label>City</label><input id="newCafeCity" placeholder="Chandigarh"/></div>
+              <div class="field"><label>City</label><input id="newCafeCity" placeholder="Chandigarh" oninput="showCitySuggestions(this,'newCitySuggest')" onfocus="showCitySuggestions(this,'newCitySuggest')" autocomplete="off"/><div class="suggestions" id="newCitySuggest"></div></div>
               <div class="field"><label>Phone</label><input id="newCafePhone" placeholder="+91 …"/></div>
-              <div class="field"><label>Credit Limit (₹)</label><input id="newCreditLimit" type="number" value="75000" /></div>
+              <div class="field"><label>Credit Limit</label><input id="newCreditLimit" type="number" value="75000" /></div>
             </div>
             <div class="row-3">
-              <div class="field"><label>Opening Balance (₹)</label><input id="newOpeningBalance" type="number" value="0" placeholder="Existing dues"/></div>
+              <div class="field"><label>Opening Balance</label><input id="newOpeningBalance" type="number" value="0" placeholder="Existing dues"/></div>
               <div class="field"><label>Has GST</label><select id="newHasGst"><option>No</option><option>Yes</option></select></div>
               <div class="field"><label>GST State</label><input id="newGstState" placeholder="Punjab / Chandigarh" /></div>
             </div>
-            <div class="row-3">
-              <div class="field"><label>Shipping</label><select id="newShipping"><option>Yes</option><option>No</option></select></div>
-              <div class="field" style="grid-column:span 2"><label>Notes</label><input id="newCafeNotes" placeholder="Optional internal note"/></div>
-            </div>
             <div class="row-actions">
-              <button class="mini-btn primary" id="createCafeBtn" onclick="submitNewCafe()">Create Café</button>
-              <button class="mini-btn" onclick="toggleAddCafe()">Cancel</button>
+              <button class="mini-btn primary" id="createCafeBtn" onclick="submitNewCafe()" type="button">Create Café</button>
+              <button class="mini-btn" onclick="toggleAddCafe()" type="button">Cancel</button>
             </div>
-            <div class="hint">Calls <code>action=addCafe</code> via POST. Creates the master row and Apps Script will auto-create the café ledger tab on first order.</div>
           </div>
 
           <div class="credit-box" id="creditBox">
@@ -475,36 +414,18 @@
       <section class="section">
         <div class="section-title">2 · Customer Details</div>
         <div class="order-id">
-          <div>
-            <div class="small">Order ID</div>
-            <div class="id" id="orderId">—</div>
-          </div>
+          <div><div class="small">Order ID</div><div class="id" id="orderId">—</div></div>
           <div class="note">Auto-generated<br/>before submit</div>
         </div>
 
-        <div class="field">
-          <label id="customerLabel">Customer Name <span class="req">*</span></label>
-          <input id="customerName" placeholder="Customer / café name" oninput="updatePreview()" />
+        <div class="field"><label id="customerLabel">Customer Name <span class="req">*</span></label><input id="customerName" placeholder="Customer / café name" oninput="updatePreview()" /></div>
+        <div class="row">
+          <div class="field"><label>City</label><input id="city" placeholder="Type Ch for Chandigarh" oninput="showCitySuggestions(this,'citySuggest');updatePreview()" onfocus="showCitySuggestions(this,'citySuggest')" autocomplete="off"/><div class="suggestions" id="citySuggest"></div></div>
+          <div class="field"><label>Phone / Notes</label><input id="phone" placeholder="Phone or internal note" oninput="updatePreview()" /></div>
         </div>
         <div class="row">
-          <div class="field">
-            <label>City</label>
-            <input id="city" placeholder="Chandigarh" oninput="updatePreview()" />
-          </div>
-          <div class="field">
-            <label>Phone / Notes</label>
-            <input id="phone" placeholder="Phone or internal note" oninput="updatePreview()" />
-          </div>
-        </div>
-        <div class="row">
-          <div class="field">
-            <label>Dispatch Date <span class="req">*</span></label>
-            <input id="dispatchDate" type="date" onchange="updatePreview()" />
-          </div>
-          <div class="field">
-            <label>Submitted</label>
-            <input id="submittedPreview" disabled />
-          </div>
+          <div class="field"><label>Dispatch Date <span class="req">*</span></label><input id="dispatchDate" type="date" onchange="updatePreview()" /></div>
+          <div class="field"><label>Submitted</label><input id="submittedPreview" disabled /></div>
         </div>
         <button class="urgent" id="urgentBtn" onclick="toggleUrgent()" type="button"><span class="checkbox" id="urgentCheck"></span> Mark as urgent</button>
       </section>
@@ -519,10 +440,7 @@
     <aside class="side">
       <div class="summary-card">
         <div class="summary-top">
-          <div>
-            <div class="summary-title">Current Ticket</div>
-            <div class="summary-id" id="summaryOrderId">—</div>
-          </div>
+          <div><div class="summary-title">Current Ticket</div><div class="summary-id" id="summaryOrderId">—</div></div>
           <div class="summary-title" id="summarySource">No source</div>
         </div>
         <div class="summary-grid">
@@ -534,7 +452,7 @@
       </div>
       <button class="submit" id="submitBtn" onclick="submitOrder()">Generate Order Slip</button>
       <button class="submit secondary-submit" onclick="resetForm()" type="button">Clear Form</button>
-      <p class="hint" style="margin-top:16px">B2B orders require price/kg. The form auto-fills from <strong>Cafe_Pricing</strong> when available; otherwise enter price manually.</p>
+      <p class="hint" style="margin-top:16px">B2B price/kg is used only for café credit calculation. It auto-fills from <strong>Cafe_Pricing</strong> when available.</p>
     </aside>
   </div>
 </div>
@@ -544,664 +462,85 @@
 <script>
 'use strict';
 
-const DEFAULT_PRODUCTS = [
-  'Cafe Arabica','Cafe Blend','Mulberry Melt','Berry Bliss','Golden Glow','Flavor Flight','Morning Mist','Citrus Cloak','Deep Desire','Orange Octave','House Espresso Blend','House Espresso Arabica','Cold Brew Roast','Cold Brew Liquid','Filter Blend','Classic Blend','Single Origin','Robusta','Custom'
-];
+const INTERNAL_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxeRfy6mdn7SE_qVQeXgLtcggtRqAXG1m5DtPNRisdTs52Q9k6ktqqgGZ5dHhKmMkk6/exec';
+
+const DEFAULT_PRODUCTS = ['Cafe Arabica','Cafe Blend','Mulberry Melt','Berry Bliss','Golden Glow','Flavor Flight','Morning Mist','Citrus Cloak','Deep Desire','Orange Octave','House Espresso Blend','House Espresso Arabica','Cold Brew Roast','Cold Brew Liquid','Filter Blend','Classic Blend','Single Origin','Robusta','Custom'];
 const BAG_SIZES = ['250g','500g','1kg'];
 const GRINDS = ['Whole Bean','Espresso Home (4.5)','Espresso Pro (3.5)','Pour Over (12)','French Press (15)','Moka Pot (5)','Aeropress (6)','Cold Brew (16)','Custom'];
+const INDIAN_CITIES = ['Chandigarh','Chennai','Coimbatore','Chandrapur','Chhindwara','Churu','Chitrakoot','Delhi','New Delhi','Gurgaon','Gurugram','Noida','Faridabad','Ghaziabad','Mumbai','Navi Mumbai','Thane','Pune','Bengaluru','Bangalore','Hyderabad','Kolkata','Ahmedabad','Surat','Vadodara','Rajkot','Jaipur','Jodhpur','Udaipur','Kota','Ajmer','Amritsar','Jalandhar','Ludhiana','Patiala','Mohali','Panchkula','Zirakpur','Kharar','Derabassi','Bathinda','Pathankot','Jammu','Dehradun','Haridwar','Rishikesh','Lucknow','Kanpur','Agra','Varanasi','Prayagraj','Meerut','Bareilly','Bhopal','Indore','Jabalpur','Gwalior','Raipur','Nagpur','Nashik','Aurangabad','Goa','Panaji','Kochi','Kozhikode','Thiruvananthapuram','Mysuru','Mangalore','Madurai','Coimbatore','Tiruchirappalli','Vijayawada','Visakhapatnam','Bhubaneswar','Guwahati','Ranchi','Patna','Shimla','Solan'];
 
-const state = {
-  webAppUrl: localStorage.getItem('IKKIS_KOT_V2_URL') || '',
-  source: '',
-  orderNo: null,
-  orderId: '—',
-  cafes: JSON.parse(localStorage.getItem('IKKIS_KOT_V2_CAFES') || '[]'),
-  selectedCafe: null,
-  cafePricing: {},
-  credit: null,
-  urgent: false,
-  items: [],
-  pendingRequests: 0
-};
-
+const state = { webAppUrl: localStorage.getItem('IKKIS_KOT_V2_URL') || INTERNAL_WEB_APP_URL, source:'', orderNo:null, orderId:'—', cafes:JSON.parse(localStorage.getItem('IKKIS_KOT_V2_CAFES')||'[]'), selectedCafe:null, cafePricing:{}, credit:null, urgent:false, items:[] };
 const $ = id => document.getElementById(id);
 
 function init(){
   $('webAppUrl').value = state.webAppUrl;
+  $('urlPreview').textContent = state.webAppUrl.replace('https://script.google.com/macros/s/','').slice(0,48) + '…';
   $('dispatchDate').min = new Date().toISOString().slice(0,10);
   $('submittedPreview').value = formatDateTime(new Date());
   addItem();
   updateConnectionStatus();
-  renderCafeOptions();  // render from localStorage cache immediately
+  renderCafeOptions();
   updatePreview();
-  if(state.webAppUrl) loadCafes(false);
+  loadCafes(false);
 }
-
 document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('click', e => { if(!e.target.closest('.field')) closeAllSuggestions(); });
 
-// ──────────────────────────────────────────────────────────
-// DIAGNOSTICS — visible log so you can SEE what's failing
-// ──────────────────────────────────────────────────────────
-function diag(message, type=''){
-  const box = $('diag');
-  box.classList.add('visible');
-  const line = document.createElement('div');
-  line.className = 'diag-line ' + type;
-  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + message;
-  box.appendChild(line);
-  box.scrollTop = box.scrollHeight;
-  // Trim if too many
-  while(box.children.length > 30) box.removeChild(box.firstChild);
-}
+function toggleSettings(){ $('scriptBox').classList.toggle('open'); $('settingsToggle').textContent = $('scriptBox').classList.contains('open') ? 'Hide' : 'Settings'; }
+function saveUrl(){ const url=$('webAppUrl').value.trim(); if(!url) return toast('Paste Web App URL first.','err'); state.webAppUrl=url; localStorage.setItem('IKKIS_KOT_V2_URL',url); $('urlPreview').textContent=url.replace('https://script.google.com/macros/s/','').slice(0,48)+'…'; updateConnectionStatus(); toast('Web App URL saved.','ok'); diag('URL saved','ok'); }
+function getUrl(){ const url=($('webAppUrl').value.trim()||state.webAppUrl||INTERNAL_WEB_APP_URL).trim(); if(!url) throw new Error('Missing Web App URL.'); return url; }
+function updateConnectionStatus(text,cls=''){ const el=$('connectionStatus'); el.className='status-pill '+cls; if(text){el.innerHTML=text; return;} el.innerHTML='<strong>Connected</strong>IKKIS KOT v2 ready'; el.className='status-pill ok'; }
+function diag(message,type=''){ const box=$('diag'); const line=document.createElement('div'); line.className='diag-line '+type; line.textContent='['+new Date().toLocaleTimeString()+'] '+message; box.appendChild(line); while(box.children.length>20) box.removeChild(box.firstChild); }
+function showDiag(){ $('diag').classList.add('visible'); }
 
-// ──────────────────────────────────────────────────────────
-// URL / CONNECTION
-// ──────────────────────────────────────────────────────────
-function saveUrl(){
-  const url = $('webAppUrl').value.trim();
-  if(!url){ toast('Paste Web App URL first.','err'); return; }
-  if(!url.includes('script.google.com')){ toast('That does not look like a Google Apps Script URL.','warn'); }
-  state.webAppUrl = url;
-  localStorage.setItem('IKKIS_KOT_V2_URL', url);
-  updateConnectionStatus();
-  toast('Web App URL saved.', 'ok');
-  diag('URL saved: ' + url.slice(0, 60) + '…', 'ok');
-}
+async function apiGet(action, params={}){ const url=new URL(getUrl()); url.searchParams.set('action',action); Object.entries(params).forEach(([k,v])=>url.searchParams.set(k, v==null?'':String(v))); diag('GET '+action+(Object.keys(params).length?' '+JSON.stringify(params):'')); const res=await fetch(url.toString(),{method:'GET',redirect:'follow'}); const text=await res.text(); let json; try{json=JSON.parse(text)}catch(e){throw new Error('Apps Script returned non-JSON. Check Web App access/deployment.')} if(json.error) throw new Error(json.error); diag('OK '+action,'ok'); return json; }
+async function testConnection(){ showDiag(); try{ saveUrl(); const data=await apiGet('ping'); updateConnectionStatus('<strong>Connected</strong>IKKIS KOT v2 online','ok'); toast('Connection successful.','ok'); await loadCafes(false); }catch(err){ updateConnectionStatus('<strong>Connection issue</strong>'+err.message.slice(0,60),'err'); toast(err.message,'err'); } }
 
-function getUrl(){
-  const url = ($('webAppUrl').value.trim() || state.webAppUrl).trim();
-  if(!url) throw new Error('Paste your Apps Script Web App URL first.');
-  return url;
-}
+function selectSource(code){ state.source=code; ['S','W','B'].forEach(c=>$('source'+c).classList.toggle('active',c===code)); $('b2bPanel').classList.toggle('visible',code==='B'); $('formCard').classList.toggle('is-b2b',code==='B'); $('customerLabel').innerHTML=code==='B'?'Café Name <span class="req">*</span>':'Customer Name <span class="req">*</span>'; if(code==='B'&&!state.cafes.length) loadCafes(false); state.orderNo=null; state.orderId='—'; updatePreview(); }
+function sourceFull(){ if(state.source==='S') return 'S — Shopify B2C'; if(state.source==='W') return 'W — WhatsApp / Phone B2C'; if(state.source==='B') return 'B — B2B Wholesale'; return '—'; }
+async function ensureOrderId(){ if(state.orderNo) return makeOrderId(); try{ const data=await apiGet('nextOrderNum'); state.orderNo=data.next||fallbackOrderNo(); }catch(e){ state.orderNo=fallbackOrderNo(); toast('Using fallback ID.','warn'); } return makeOrderId(); }
+function fallbackOrderNo(){ const d=new Date(); return String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0'); }
+function makeOrderId(){ const d=new Date(),p=n=>String(n).padStart(2,'0'); const date=String(d.getFullYear()).slice(2)+p(d.getMonth()+1)+p(d.getDate()); return `${state.source||'X'}-${date}-${state.orderNo||'---'}`; }
 
-function updateConnectionStatus(text, cls=''){
-  const el = $('connectionStatus');
-  el.className = 'status-pill ' + cls;
-  if(text){ el.innerHTML = text; return; }
-  if(state.webAppUrl){ el.innerHTML = '<strong>Connected</strong>Web App URL saved'; el.className = 'status-pill ok'; }
-  else { el.innerHTML = '<strong>Not connected</strong>Add Web App URL'; }
-}
+async function loadCafes(showToast=true){ try{ const data=await apiGet('getCafes'); state.cafes=Array.isArray(data.cafes)?data.cafes:[]; localStorage.setItem('IKKIS_KOT_V2_CAFES',JSON.stringify(state.cafes)); renderCafeOptions(); if(showToast) toast(`Loaded ${state.cafes.length} cafés.`,'ok'); }catch(err){ renderCafeOptions(); if(showToast) toast('Could not load cafés: '+err.message,'err'); } }
+function renderCafeOptions(){ const sel=$('cafeSelect'); const current=sel.value; if(!state.cafes.length){ sel.innerHTML='<option value="">No cafés loaded — click Load Cafés</option>'; return; } const sorted=[...state.cafes].sort((a,b)=>(a.name||'').localeCompare(b.name||'')); sel.innerHTML='<option value="">Select café…</option>'+sorted.map(c=>`<option value="${escapeHtml(c.name)}" ${c.name===current?'selected':''}>${escapeHtml(c.name)}${c.city?' · '+escapeHtml(c.city):''}</option>`).join(''); }
+async function onCafeSelected(){ const name=$('cafeSelect').value; state.selectedCafe=state.cafes.find(c=>c.name===name)||null; $('manualCafeName').value=''; if(name){ $('customerName').value=name; if(state.selectedCafe){ $('city').value=state.selectedCafe.city||$('city').value; $('phone').value=state.selectedCafe.phone||$('phone').value; } await Promise.all([loadCafePricing(name), loadCredit(false)]); } else {state.cafePricing={}; state.credit=null; renderItems(); updateCreditBox();} updatePreview(); }
+function onManualCafeInput(){ const name=$('manualCafeName').value.trim(); if(name){ $('cafeSelect').value=''; $('customerName').value=name; state.selectedCafe=null; state.cafePricing={}; renderItems(); } updatePreview(); }
+function currentCafeName(){ return state.source==='B' ? ($('cafeSelect').value || $('manualCafeName').value.trim() || $('customerName').value.trim()) : ''; }
+async function loadCafePricing(name){ try{ const data=await apiGet('getPricing',{cafe:name}); state.cafePricing=data.pricing||{}; autoFillItemPrices(); renderItems(); }catch(e){ state.cafePricing={}; } }
+async function loadCredit(showToast=true){ const name=currentCafeName(); if(!name) return showToast&&toast('Select a café first.','warn'); try{ const data=await apiGet('getCredit',{cafe:name}); state.credit=data; updateCreditBox(); if(showToast) toast('Credit refreshed.','ok'); }catch(err){ state.credit=null; updateCreditBox(); if(showToast) toast('Credit not found.','warn'); } }
+function toggleAddCafe(){ const panel=$('addCafePanel'); panel.classList.toggle('visible'); if(panel.classList.contains('visible')){ const manual=$('manualCafeName').value.trim(); if(manual&&!$('newCafeName').value) $('newCafeName').value=manual; } }
+async function submitNewCafe(){ const name=$('newCafeName').value.trim(); if(!name) return toast('New café name required.','err'); try{ const data=await apiGet('addCafe',{name, gstEntity:$('newGstEntity').value.trim(), city:$('newCafeCity').value.trim(), phone:$('newCafePhone').value.trim(), creditLimit:$('newCreditLimit').value||75000, openingBalance:$('newOpeningBalance').value||0, hasGst:$('newHasGst').value, gstState:$('newGstState').value.trim(), shipping:'Yes'}); toast(`Café "${name}" created.`,'ok'); $('addCafePanel').classList.remove('visible'); await loadCafes(false); $('cafeSelect').value=name; await onCafeSelected(); }catch(err){ toast('Could not create café: '+err.message,'err'); } }
 
-// ──────────────────────────────────────────────────────────
-// API HELPERS
-// ──────────────────────────────────────────────────────────
-function startReq(btnId){
-  state.pendingRequests++;
-  if(btnId){
-    const btn = $(btnId);
-    if(btn){
-      btn.disabled = true;
-      btn.dataset.origText = btn.textContent;
-      btn.innerHTML = '<span class="spinner spinner-dark"></span>' + btn.textContent;
-    }
-  }
-}
-function endReq(btnId){
-  state.pendingRequests = Math.max(0, state.pendingRequests - 1);
-  if(btnId){
-    const btn = $(btnId);
-    if(btn){
-      btn.disabled = false;
-      if(btn.dataset.origText){ btn.textContent = btn.dataset.origText; delete btn.dataset.origText; }
-    }
-  }
-}
+function addItem(){ state.items.push({id:Date.now()+Math.random(), product:'', bagSize:'250g', qty:1, grind:'Whole Bean', notes:'', pricePerKg:'', priceAutoFilled:false}); renderItems(); updatePreview(); }
+function removeItem(id){ state.items=state.items.filter(i=>String(i.id)!==String(id)); renderItems(); updatePreview(); }
+function setItem(id,key,value){ const item=state.items.find(i=>String(i.id)===String(id)); if(!item) return; item[key]=value; if(key==='product'&&state.source==='B'){ const pricing=state.cafePricing[value]; if(pricing&&pricing.price){ item.pricePerKg=pricing.price; item.priceAutoFilled=true; } else item.priceAutoFilled=false; } if(key==='pricePerKg') item.priceAutoFilled=false; renderItems(); updatePreview(); }
+function autoFillItemPrices(){ state.items.forEach(item=>{ const pricing=state.cafePricing[item.product]; if(pricing&&pricing.price){ item.pricePerKg=pricing.price; item.priceAutoFilled=true; } }); }
+function productOptions(selected){ const fromPricing=Object.keys(state.cafePricing||{}); const products=Array.from(new Set([...fromPricing,...DEFAULT_PRODUCTS])); return '<option value="">Select product…</option>'+products.map(p=>`<option value="${escapeHtml(p)}" ${p===selected?'selected':''}>${escapeHtml(p)}</option>`).join(''); }
+function renderItems(){ $('items').innerHTML=state.items.map((item,index)=>`<div class="item"><div class="item-head"><div class="item-title">Item ${index+1}</div><button class="remove" onclick="removeItem('${item.id}')" type="button">Remove</button></div><div class="item-grid"><div class="field"><label>Product <span class="req">*</span></label><select onchange="setItem('${item.id}','product',this.value)">${productOptions(item.product)}</select></div><div class="field"><label>Bag Size <span class="req">*</span></label><select onchange="setItem('${item.id}','bagSize',this.value)">${BAG_SIZES.map(b=>`<option value="${b}" ${b===item.bagSize?'selected':''}>${b}</option>`).join('')}</select></div><div class="field"><label>Qty <span class="req">*</span></label><input type="number" min="1" value="${item.qty}" onchange="setItem('${item.id}','qty',this.value)" /></div></div><div class="item-grid-3"><div class="field"><label>Grind</label><select onchange="setItem('${item.id}','grind',this.value)">${GRINDS.map(g=>`<option value="${g}" ${g===item.grind?'selected':''}>${g}</option>`).join('')}</select></div><div class="field price-field"><label>Rate / Kg <span class="req">*</span>${item.priceAutoFilled?'<span class="price-auto-tag">auto</span>':''}</label><input type="number" min="0" value="${item.pricePerKg||''}" placeholder="Auto from café pricing" onchange="setItem('${item.id}','pricePerKg',this.value)" /><div class="hint">Used only for B2B credit amount.</div></div><div class="field"><label>Notes</label><input value="${escapeAttr(item.notes)}" placeholder="Optional" onchange="setItem('${item.id}','notes',this.value)" /></div></div></div>`).join(''); }
 
-async function apiGet(action, params={}){
-  const url = new URL(getUrl());
-  url.searchParams.set('action', action);
-  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, v == null ? '' : String(v)));
-  diag('GET ' + action + (Object.keys(params).length ? ' ' + JSON.stringify(params) : ''));
-  let res;
-  try{
-    res = await fetch(url.toString(), { method:'GET', redirect:'follow' });
-  }catch(networkErr){
-    diag('Network error: ' + networkErr.message, 'err');
-    throw new Error('Network error — check internet & Web App URL.');
-  }
-  const text = await res.text();
-  let json;
-  try{ json = JSON.parse(text); }
-  catch(e){
-    diag('Bad JSON response: ' + text.slice(0,120), 'err');
-    throw new Error('Apps Script returned non-JSON. Check that the deployment is "Anyone" and a new version is deployed.');
-  }
-  if(json.error){ diag('API error: ' + json.error, 'err'); throw new Error(json.error); }
-  diag('OK ' + action, 'ok');
-  return json;
-}
+function showCitySuggestions(input, boxId){ const box=$(boxId); const q=input.value.trim().toLowerCase(); if(!q){ box.classList.remove('open'); return; } const matches=INDIAN_CITIES.filter(c=>c.toLowerCase().startsWith(q)).slice(0,8); if(!matches.length){ box.classList.remove('open'); return; } box.innerHTML=matches.map(c=>`<div class="suggestion-item" onmousedown="selectCity('${boxId}','${escapeAttr(c)}')">${escapeHtml(c)}</div>`).join(''); box.classList.add('open'); }
+function selectCity(boxId, city){ const input = boxId==='citySuggest' ? $('city') : $('newCafeCity'); input.value=city; $(boxId).classList.remove('open'); updatePreview(); }
+function closeAllSuggestions(){ document.querySelectorAll('.suggestions').forEach(s=>s.classList.remove('open')); }
+function toggleUrgent(){ state.urgent=!state.urgent; $('urgentBtn').classList.toggle('active',state.urgent); $('urgentCheck').textContent=state.urgent?'✓':''; }
 
-// POST helper — Apps Script doPost handles this
-async function apiPost(action, body){
-  const url = getUrl();
-  diag('POST ' + action);
-  try{
-    await fetch(url, {
-      method:'POST',
-      mode:'no-cors',
-      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, ...body })
-    });
-    diag('POST ' + action + ' sent (no-cors — cannot confirm response)', 'ok');
-    return { status:'sent' };
-  }catch(networkErr){
-    diag('POST network error: ' + networkErr.message, 'err');
-    throw new Error('POST failed: ' + networkErr.message);
-  }
-}
+function totals(){ let bags=0,kg=0,amount=0; state.items.forEach(item=>{ const qty=Number(item.qty)||0; const itemKg=bagKg(item.bagSize)*qty; const price=Number(item.pricePerKg)||0; bags+=qty; kg+=itemKg; amount+=itemKg*price; }); return {lines:state.items.length,bags,kg,amount}; }
+function updatePreview(){ if(state.orderNo) state.orderId=makeOrderId(); $('orderId').textContent=state.orderId; $('summaryOrderId').textContent=state.orderId; $('summarySource').textContent=sourceFull(); const t=totals(); $('sumLines').textContent=t.lines; $('sumBags').textContent=t.bags; $('sumKg').textContent=t.kg.toFixed(2); $('sumAmount').textContent='Rs '+formatINR(t.amount); updateCreditBox(); }
+function updateCreditBox(){ const t=totals(); if(state.source!=='B'){ $('creditStatus').textContent='B2B credit appears here after selecting a café.'; $('creditStatus').className='credit-status'; ['creditLimit','creditOutstanding','creditRemaining','creditAfter'].forEach(id=>$(id).textContent='—'); return; } const c=state.credit; if(!c){ $('creditStatus').textContent='Select café and refresh credit.'; $('creditStatus').className='credit-status yellow'; ['creditLimit','creditOutstanding','creditRemaining','creditAfter'].forEach(id=>$(id).textContent='—'); return; } const afterOutstanding=Number(c.outstanding||0)+t.amount; const remainingAfter=Number(c.limit||0)-afterOutstanding; const status=creditStatus(afterOutstanding,Number(c.limit||75000)); $('creditLimit').textContent='Rs '+formatINR(c.limit); $('creditOutstanding').textContent='Rs '+formatINR(c.outstanding); $('creditRemaining').textContent='Rs '+formatINR(c.remaining); $('creditAfter').textContent='Rs '+formatINR(remainingAfter); $('creditStatus').textContent=`${status.emoji} ${status.label} after this order · outstanding Rs ${formatINR(afterOutstanding)}`; $('creditStatus').className='credit-status '+status.className; }
+function creditStatus(outstanding,limit){ if(outstanding>limit) return {label:'RED — credit exceeded',emoji:'🔴',className:'red'}; if(outstanding>limit*2/3) return {label:'YELLOW — approaching limit',emoji:'🟡',className:'yellow'}; return {label:'GREEN — healthy',emoji:'🟢',className:'green'}; }
 
-async function testConnection(){
-  $('diag').classList.add('visible');
-  diag('Testing connection…');
-  try{
-    saveUrl();
-    const data = await apiGet('ping');
-    if(data.status === 'ok' || data.ok === true){
-      updateConnectionStatus('<strong>Connected</strong>IKKIS KOT v2 online', 'ok');
-      toast('Connection successful.', 'ok');
-      await loadCafes(false);
-    } else {
-      updateConnectionStatus('<strong>Reached but unexpected response</strong>', 'err');
-      toast('Connected but ping returned: ' + JSON.stringify(data).slice(0,80), 'warn');
-    }
-  }catch(err){
-    updateConnectionStatus('<strong>Connection issue</strong>' + err.message.slice(0,60), 'err');
-    toast(err.message, 'err');
-  }
-}
+function validate(){ if(!state.source) return toast('Select source: S, W, or B.','err'),false; const name=$('customerName').value.trim(); if(!name) return toast(state.source==='B'?'Select or enter café name.':'Customer name required.','err'),false; if(state.source==='B'&&!currentCafeName()) return toast('B2B café name required.','err'),false; if(!$('dispatchDate').value) return toast('Dispatch date required.','err'),false; if(!state.items.length) return toast('Add at least one item.','err'),false; for(let i=0;i<state.items.length;i++){ const item=state.items[i]; if(!item.product) return toast(`Item ${i+1}: product required.`,'err'),false; if(!item.bagSize) return toast(`Item ${i+1}: bag size required.`,'err'),false; if(!Number(item.qty)) return toast(`Item ${i+1}: quantity required.`,'err'),false; if(state.source==='B'&&!Number(item.pricePerKg)) return toast(`Item ${i+1}: B2B rate/kg required.`,'err'),false; } return true; }
+function buildPayload(){ const isB2B=state.source==='B'; const cafeName=isB2B?currentCafeName():''; return {orderId:state.orderId, source:state.source, sourceFull:sourceFull(), customerName:isB2B?cafeName:$('customerName').value.trim(), cafeName, city:$('city').value.trim(), phone:$('phone').value.trim(), dispatchDate:$('dispatchDate').value, urgent:state.urgent, submittedAt:new Date().toISOString(), items:state.items.map(item=>({product:item.product, bagSize:item.bagSize, qty:Number(item.qty), grind:item.grind||'Whole Bean', notes:item.notes||'', pricePerKg:Number(item.pricePerKg)||0}))}; }
+async function submitOrder(){ if(!validate()) return; const btn=$('submitBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Submitting'; try{ await ensureOrderId(); const payload=buildPayload(); await fetch(getUrl(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}); toast(`Order ${payload.orderId} submitted. PDF will print shortly.`,'ok'); setTimeout(resetForm,1100); }catch(err){ toast('Submission failed: '+err.message,'err'); } finally{ btn.disabled=false; btn.textContent='Generate Order Slip'; } }
+function resetForm(){ state.source=''; state.orderNo=null; state.orderId='—'; state.selectedCafe=null; state.credit=null; state.cafePricing={}; state.urgent=false; state.items=[]; ['S','W','B'].forEach(c=>$('source'+c).classList.remove('active')); $('b2bPanel').classList.remove('visible'); $('formCard').classList.remove('is-b2b'); ['customerName','city','phone','manualCafeName'].forEach(id=>$(id).value=''); $('cafeSelect').value=''; $('dispatchDate').value=''; $('urgentBtn').classList.remove('active'); $('urgentCheck').textContent=''; $('addCafePanel').classList.remove('visible'); addItem(); updatePreview(); }
 
-// ──────────────────────────────────────────────────────────
-// SOURCE SELECTION
-// ──────────────────────────────────────────────────────────
-function selectSource(code){
-  state.source = code;
-  ['S','W','B'].forEach(c => $('source'+c).classList.toggle('active', c===code));
-  $('b2bPanel').classList.toggle('visible', code === 'B');
-  $('formCard').classList.toggle('is-b2b', code === 'B');
-  $('customerLabel').innerHTML = code === 'B' ? 'Café Name <span class="req">*</span>' : 'Customer Name <span class="req">*</span>';
-  if(code === 'B' && state.webAppUrl && !state.cafes.length) loadCafes(false);
-  state.orderNo = null;
-  state.orderId = '—';
-  updatePreview();
-}
-
-function sourceFull(){
-  if(state.source === 'S') return 'S — Shopify B2C';
-  if(state.source === 'W') return 'W — WhatsApp / Phone B2C';
-  if(state.source === 'B') return 'B — B2B Wholesale';
-  return '—';
-}
-
-async function ensureOrderId(){
-  if(state.orderNo) return makeOrderId();
-  try{
-    const data = await apiGet('nextOrderNum');
-    state.orderNo = data.next || fallbackOrderNo();
-  }catch(e){
-    state.orderNo = fallbackOrderNo();
-    toast('Could not reserve sheet number. Using fallback ID.', 'warn');
-  }
-  return makeOrderId();
-}
-function fallbackOrderNo(){
-  const d = new Date();
-  return String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0') + String(d.getSeconds()).padStart(2,'0');
-}
-function makeOrderId(){
-  const d = new Date();
-  const p = n => String(n).padStart(2,'0');
-  const date = String(d.getFullYear()).slice(2) + p(d.getMonth()+1) + p(d.getDate());
-  return `${state.source || 'X'}-${date}-${state.orderNo || '---'}`;
-}
-
-// ──────────────────────────────────────────────────────────
-// CAFÉS
-// ──────────────────────────────────────────────────────────
-async function loadCafes(showToast=true){
-  startReq('loadCafesBtn');
-  try{
-    const data = await apiGet('getCafes');
-    state.cafes = Array.isArray(data.cafes) ? data.cafes : [];
-    localStorage.setItem('IKKIS_KOT_V2_CAFES', JSON.stringify(state.cafes));
-    renderCafeOptions();
-    if(showToast) toast(`Loaded ${state.cafes.length} cafés.`, 'ok');
-    diag(`Loaded ${state.cafes.length} cafés`, 'ok');
-  }catch(err){
-    renderCafeOptions();  // falls back to cached cafés
-    if(showToast) toast('Could not load cafés: ' + err.message, 'err');
-  }finally{
-    endReq('loadCafesBtn');
-  }
-}
-
-function renderCafeOptions(){
-  const sel = $('cafeSelect');
-  const currentValue = sel.value;
-  if(!state.cafes.length){
-    sel.innerHTML = '<option value="">No cafés loaded — click "Load Cafés"</option>';
-    return;
-  }
-  // Sort alphabetically for easy scanning
-  const sorted = [...state.cafes].sort((a,b) => (a.name||'').localeCompare(b.name||''));
-  sel.innerHTML = '<option value="">Select café…</option>' +
-    sorted.map(c => `<option value="${escapeHtml(c.name)}" ${c.name===currentValue?'selected':''}>${escapeHtml(c.name)}${c.city ? ' · '+escapeHtml(c.city) : ''}</option>`).join('');
-}
-
-async function onCafeSelected(){
-  const name = $('cafeSelect').value;
-  state.selectedCafe = state.cafes.find(c => c.name === name) || null;
-  $('manualCafeName').value = '';
-  if(name){
-    $('customerName').value = name;
-    if(state.selectedCafe){
-      $('city').value = state.selectedCafe.city || $('city').value;
-      $('phone').value = state.selectedCafe.phone || $('phone').value;
-    }
-    await Promise.all([ loadCafePricing(name), loadCredit(false) ]);
-  } else {
-    state.cafePricing = {};
-    state.credit = null;
-    updateCreditBox();
-    renderItems();
-  }
-  updatePreview();
-}
-
-function onManualCafeInput(){
-  const name = $('manualCafeName').value.trim();
-  if(name){
-    $('cafeSelect').value = '';
-    $('customerName').value = name;
-    state.selectedCafe = null;
-    state.cafePricing = {};
-    renderItems();
-  }
-  updatePreview();
-}
-
-function currentCafeName(){
-  if(state.source !== 'B') return '';
-  return $('cafeSelect').value || $('manualCafeName').value.trim() || $('customerName').value.trim();
-}
-
-async function loadCafePricing(name){
-  if(!name) return;
-  try{
-    const data = await apiGet('getPricing', { cafe:name });
-    state.cafePricing = data.pricing || {};
-    autoFillItemPrices();
-    renderItems();
-    const count = Object.keys(state.cafePricing).length;
-    if(count) diag(`Pricing loaded: ${count} products for ${name}`, 'ok');
-  }catch(e){
-    state.cafePricing = {};
-    diag('Pricing load failed for ' + name + ': ' + e.message, 'err');
-  }
-}
-
-async function loadCredit(showToast=true){
-  const name = currentCafeName();
-  if(!name){ if(showToast) toast('Select a café first.','warn'); return; }
-  startReq('refreshCreditBtn');
-  try{
-    const data = await apiGet('getCredit', { cafe:name });
-    if(data.error) throw new Error(data.error);
-    state.credit = data;
-    updateCreditBox();
-    if(showToast) toast('Credit refreshed.', 'ok');
-  }catch(err){
-    state.credit = null;
-    updateCreditBox();
-    if(showToast) toast('Credit not found: ' + err.message, 'warn');
-  }finally{
-    endReq('refreshCreditBtn');
-  }
-}
-
-function toggleAddCafe(){
-  const panel = $('addCafePanel');
-  panel.classList.toggle('visible');
-  if(panel.classList.contains('visible')){
-    // Pre-fill from manual cafe input if present
-    const manual = $('manualCafeName').value.trim();
-    if(manual && !$('newCafeName').value) $('newCafeName').value = manual;
-  }
-}
-
-async function submitNewCafe(){
-  const name = $('newCafeName').value.trim();
-  if(!name){ toast('New café name required.', 'err'); $('newCafeName').focus(); return; }
-  if(state.cafes.find(c => (c.name||'').toLowerCase() === name.toLowerCase())){
-    toast('Café "'+name+'" already exists. Select from dropdown.', 'warn');
-    return;
-  }
-
-  startReq('createCafeBtn');
-  try{
-    // Try POST first (cleanest, handles long names/special chars)
-    // Fallback to GET if POST is blocked by no-cors
-    const body = {
-      name,
-      gstEntity: $('newGstEntity').value.trim(),
-      city: $('newCafeCity').value.trim(),
-      phone: $('newCafePhone').value.trim(),
-      creditLimit: Number($('newCreditLimit').value) || 75000,
-      openingBalance: Number($('newOpeningBalance').value) || 0,
-      hasGst: $('newHasGst').value,
-      gstState: $('newGstState').value.trim(),
-      shipping: $('newShipping').value,
-      notes: $('newCafeNotes').value.trim()
-    };
-
-    // Use GET because we need a confirmation response
-    const data = await apiGet('addCafe', body);
-    if(data.error) throw new Error(data.error);
-
-    toast(`Café "${name}" created.`, 'ok');
-    diag('Café created: ' + name + ' (ID: ' + (data.id||'?') + ')', 'ok');
-
-    // Clear the form
-    ['newCafeName','newGstEntity','newCafeCity','newCafePhone','newGstState','newCafeNotes'].forEach(id => $(id).value='');
-    $('newCreditLimit').value = '75000';
-    $('newOpeningBalance').value = '0';
-    $('newHasGst').value = 'No';
-    $('newShipping').value = 'Yes';
-
-    $('addCafePanel').classList.remove('visible');
-
-    // Reload cafés so dropdown shows new one
-    await loadCafes(false);
-
-    // Auto-select the newly created café
-    $('cafeSelect').value = name;
-    await onCafeSelected();
-
-  }catch(err){
-    toast('Could not create café: ' + err.message, 'err');
-    diag('Add café error: ' + err.message, 'err');
-  }finally{
-    endReq('createCafeBtn');
-  }
-}
-
-// ──────────────────────────────────────────────────────────
-// ITEMS
-// ──────────────────────────────────────────────────────────
-function addItem(){
-  state.items.push({ id: Date.now() + Math.random(), product:'', bagSize:'250g', qty:1, grind:'Whole Bean', notes:'', pricePerKg:'', priceAutoFilled:false });
-  renderItems();
-  updatePreview();
-}
-function removeItem(id){
-  state.items = state.items.filter(i => String(i.id) !== String(id));
-  renderItems();
-  updatePreview();
-}
-function setItem(id, key, value){
-  const item = state.items.find(i => String(i.id) === String(id));
-  if(!item) return;
-  item[key] = value;
-  if(key === 'product' && state.source === 'B'){
-    const pricing = state.cafePricing[value];
-    if(pricing && pricing.price){
-      item.pricePerKg = pricing.price;
-      item.priceAutoFilled = true;
-    } else {
-      item.priceAutoFilled = false;
-    }
-  }
-  if(key === 'pricePerKg'){ item.priceAutoFilled = false; }
-  renderItems();
-  updatePreview();
-}
-
-function autoFillItemPrices(){
-  state.items.forEach(item => {
-    const pricing = state.cafePricing[item.product];
-    if(pricing && pricing.price){
-      item.pricePerKg = pricing.price;
-      item.priceAutoFilled = true;
-    }
-  });
-}
-
-function productOptions(selected){
-  const fromPricing = Object.keys(state.cafePricing || {});
-  const products = Array.from(new Set([...fromPricing, ...DEFAULT_PRODUCTS]));
-  return '<option value="">Select product…</option>' +
-    products.map(p => `<option value="${escapeHtml(p)}" ${p===selected?'selected':''}>${escapeHtml(p)}</option>`).join('');
-}
-
-function renderItems(){
-  const box = $('items');
-  box.innerHTML = state.items.map((item, index) => `
-    <div class="item">
-      <div class="item-head">
-        <div class="item-title">Item ${index+1}</div>
-        <button class="remove" onclick="removeItem('${item.id}')" type="button">Remove</button>
-      </div>
-      <div class="item-grid">
-        <div class="field">
-          <label>Product <span class="req">*</span></label>
-          <select onchange="setItem('${item.id}','product',this.value)">${productOptions(item.product)}</select>
-        </div>
-        <div class="field">
-          <label>Bag Size <span class="req">*</span></label>
-          <select onchange="setItem('${item.id}','bagSize',this.value)">${BAG_SIZES.map(b=>`<option value="${b}" ${b===item.bagSize?'selected':''}>${b}</option>`).join('')}</select>
-        </div>
-        <div class="field">
-          <label>Qty <span class="req">*</span></label>
-          <input type="number" min="1" value="${item.qty}" onchange="setItem('${item.id}','qty',this.value)" />
-        </div>
-      </div>
-      <div class="item-grid-3">
-        <div class="field">
-          <label>Grind</label>
-          <select onchange="setItem('${item.id}','grind',this.value)">${GRINDS.map(g=>`<option value="${g}" ${g===item.grind?'selected':''}>${g}</option>`).join('')}</select>
-        </div>
-        <div class="field price-field">
-          <label>Price / Kg <span class="req">*</span>${item.priceAutoFilled?'<span class="price-auto-tag">auto</span>':''}</label>
-          <input type="number" min="0" value="${item.pricePerKg || ''}" placeholder="Auto / manual" onchange="setItem('${item.id}','pricePerKg',this.value)" />
-        </div>
-        <div class="field">
-          <label>Notes</label>
-          <input value="${escapeAttr(item.notes)}" placeholder="Optional" onchange="setItem('${item.id}','notes',this.value)" />
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function toggleUrgent(){
-  state.urgent = !state.urgent;
-  $('urgentBtn').classList.toggle('active', state.urgent);
-  $('urgentCheck').textContent = state.urgent ? '✓' : '';
-}
-
-// ──────────────────────────────────────────────────────────
-// TOTALS / PREVIEW
-// ──────────────────────────────────────────────────────────
-function totals(){
-  let bags = 0, kg = 0, amount = 0;
-  state.items.forEach(item => {
-    const qty = Number(item.qty) || 0;
-    const itemKg = bagKg(item.bagSize) * qty;
-    const price = Number(item.pricePerKg) || 0;
-    bags += qty;
-    kg += itemKg;
-    amount += itemKg * price;
-  });
-  return { lines:state.items.length, bags, kg, amount };
-}
-function updatePreview(){
-  if(state.orderNo) state.orderId = makeOrderId();
-  $('orderId').textContent = state.orderId;
-  $('summaryOrderId').textContent = state.orderId;
-  $('summarySource').textContent = sourceFull();
-  const t = totals();
-  $('sumLines').textContent = t.lines;
-  $('sumBags').textContent = t.bags;
-  $('sumKg').textContent = t.kg.toFixed(2);
-  $('sumAmount').textContent = 'Rs ' + formatINR(t.amount);
-  updateCreditBox();
-}
-
-function updateCreditBox(){
-  const t = totals();
-  if(state.source !== 'B'){
-    $('creditStatus').textContent = 'B2B credit appears here after selecting a café.';
-    $('creditStatus').className = 'credit-status';
-    ['creditLimit','creditOutstanding','creditRemaining','creditAfter'].forEach(id => $(id).textContent = '—');
-    return;
-  }
-  const c = state.credit;
-  if(!c){
-    $('creditStatus').textContent = 'No credit record loaded. Select a café and click "Refresh Credit".';
-    $('creditStatus').className = 'credit-status yellow';
-    ['creditLimit','creditOutstanding','creditRemaining','creditAfter'].forEach(id => $(id).textContent = '—');
-    return;
-  }
-  const afterOutstanding = Number(c.outstanding || 0) + t.amount;
-  const remainingAfter = Number(c.limit || 0) - afterOutstanding;
-  const status = creditStatus(afterOutstanding, Number(c.limit || 75000));
-  $('creditLimit').textContent = 'Rs ' + formatINR(c.limit);
-  $('creditOutstanding').textContent = 'Rs ' + formatINR(c.outstanding);
-  $('creditRemaining').textContent = 'Rs ' + formatINR(c.remaining);
-  $('creditAfter').textContent = 'Rs ' + formatINR(remainingAfter);
-  $('creditStatus').textContent = `${status.emoji} ${status.label} after this order · outstanding Rs ${formatINR(afterOutstanding)}`;
-  $('creditStatus').className = 'credit-status ' + status.className;
-}
-
-function creditStatus(outstanding, limit){
-  if(outstanding > limit) return { label:'RED — credit exceeded', emoji:'🔴', className:'red' };
-  if(outstanding > limit * 2 / 3) return { label:'YELLOW — approaching limit', emoji:'🟡', className:'yellow' };
-  return { label:'GREEN — healthy', emoji:'🟢', className:'green' };
-}
-
-// ──────────────────────────────────────────────────────────
-// VALIDATION & SUBMIT
-// ──────────────────────────────────────────────────────────
-function validate(){
-  if(!state.webAppUrl && !$('webAppUrl').value.trim()){ toast('Paste Web App URL first.', 'err'); return false; }
-  if(!state.source){ toast('Select source: S, W, or B.', 'err'); return false; }
-  const name = $('customerName').value.trim();
-  if(!name){ toast(state.source === 'B' ? 'Select or enter café name.' : 'Customer name required.', 'err'); return false; }
-  if(state.source === 'B' && !currentCafeName()){ toast('B2B café name required.', 'err'); return false; }
-  if(!$('dispatchDate').value){ toast('Dispatch date required.', 'err'); return false; }
-  if(!state.items.length){ toast('Add at least one item.', 'err'); return false; }
-  for(let i=0;i<state.items.length;i++){
-    const item = state.items[i];
-    if(!item.product){ toast(`Item ${i+1}: product required.`, 'err'); return false; }
-    if(!item.bagSize){ toast(`Item ${i+1}: bag size required.`, 'err'); return false; }
-    if(!Number(item.qty)){ toast(`Item ${i+1}: quantity required.`, 'err'); return false; }
-    if(state.source === 'B' && !Number(item.pricePerKg)){ toast(`Item ${i+1}: B2B price/kg required.`, 'err'); return false; }
-  }
-  return true;
-}
-
-function buildPayload(){
-  const isB2B = state.source === 'B';
-  const cafeName = isB2B ? currentCafeName() : '';
-  return {
-    orderId: state.orderId,
-    source: state.source,
-    sourceFull: sourceFull(),
-    customerName: isB2B ? cafeName : $('customerName').value.trim(),
-    cafeName: cafeName,
-    city: $('city').value.trim(),
-    phone: $('phone').value.trim(),
-    dispatchDate: $('dispatchDate').value,
-    urgent: state.urgent,
-    submittedAt: new Date().toISOString(),
-    items: state.items.map(item => ({
-      product: item.product,
-      bagSize: item.bagSize,
-      qty: Number(item.qty),
-      grind: item.grind || 'Whole Bean',
-      notes: item.notes || '',
-      pricePerKg: Number(item.pricePerKg) || 0
-    }))
-  };
-}
-
-async function submitOrder(){
-  if(!validate()) return;
-  const btn = $('submitBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Submitting';
-  try{
-    saveUrl();
-    await ensureOrderId();
-    const payload = buildPayload();
-    diag('Submitting order ' + payload.orderId);
-    await fetch(getUrl(), {
-      method:'POST',
-      mode:'no-cors',
-      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    });
-    toast(`Order ${payload.orderId} submitted. PDF will print shortly.`, 'ok');
-    diag('Order submitted: ' + payload.orderId, 'ok');
-    setTimeout(resetForm, 1100);
-  }catch(err){
-    toast('Submission failed: ' + err.message, 'err');
-    diag('Submit error: ' + err.message, 'err');
-  }finally{
-    btn.disabled = false;
-    btn.textContent = 'Generate Order Slip';
-  }
-}
-
-function resetForm(){
-  state.source = '';
-  state.orderNo = null;
-  state.orderId = '—';
-  state.selectedCafe = null;
-  state.credit = null;
-  state.cafePricing = {};
-  state.urgent = false;
-  state.items = [];
-  ['S','W','B'].forEach(c => $('source'+c).classList.remove('active'));
-  $('b2bPanel').classList.remove('visible');
-  $('formCard').classList.remove('is-b2b');
-  ['customerName','city','phone','manualCafeName'].forEach(id => $(id).value='');
-  $('cafeSelect').value = '';
-  $('dispatchDate').value = '';
-  $('urgentBtn').classList.remove('active');
-  $('urgentCheck').textContent = '';
-  $('addCafePanel').classList.remove('visible');
-  addItem();
-  updatePreview();
-}
-
-// ──────────────────────────────────────────────────────────
-// UTILITIES
-// ──────────────────────────────────────────────────────────
-function bagKg(size){
-  if(size === '250g') return .25;
-  if(size === '500g') return .5;
-  if(size === '1kg') return 1;
-  const num = parseFloat(String(size).replace(/[^0-9.]/g,'')) || 0;
-  return String(size).toLowerCase().includes('kg') ? num : num/1000;
-}
+function bagKg(size){ if(size==='250g') return .25; if(size==='500g') return .5; if(size==='1kg') return 1; const num=parseFloat(String(size).replace(/[^0-9.]/g,''))||0; return String(size).toLowerCase().includes('kg')?num:num/1000; }
 function formatINR(n){ return Math.round(Number(n)||0).toLocaleString('en-IN'); }
 function formatDateTime(d){ return new Intl.DateTimeFormat('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(d); }
-function toast(msg,type=''){
-  const t = $('toast');
-  t.textContent = msg;
-  t.className = `toast ${type} show`;
-  setTimeout(()=>t.classList.remove('show'), 4200);
-}
-function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+function toast(msg,type=''){ const t=$('toast'); t.textContent=msg; t.className=`toast ${type} show`; setTimeout(()=>t.classList.remove('show'),4200); }
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 function escapeAttr(s){ return escapeHtml(s).replace(/`/g,'&#096;'); }
-
-// Keyboard shortcut: Cmd/Ctrl+Enter submits
-document.addEventListener('keydown', e => {
-  if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){
-    e.preventDefault();
-    submitOrder();
-  }
-});
+document.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){ e.preventDefault(); submitOrder(); } });
 </script>
 </body>
 </html>
