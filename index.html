@@ -52,25 +52,17 @@
     margin-bottom:22px;
   }
   .brand-lockup{
-    display:flex;
-    align-items:center;
-    gap:18px;
+    display:block;
+    max-width:620px;
   }
   .brand-logo{
-    width:78px;
-    height:78px;
+    width:clamp(320px,48vw,560px);
+    height:auto;
+    max-height:126px;
     object-fit:contain;
-    flex:0 0 auto;
     display:block;
   }
   .brand-logo.is-hidden{display:none}
-  .brand h1{
-    font-family:var(--serif);
-    font-size:clamp(40px,7vw,72px);
-    line-height:.82;
-    letter-spacing:-.035em;
-    font-weight:700;
-  }
   .brand p{
     margin-top:12px;
     font-family:var(--mono);
@@ -301,44 +293,165 @@
   }
 
   @media(max-width:620px){
-    body{padding:16px 10px 105px}
-    .shell{max-width:100%}
-    .topbar{gap:12px;margin-bottom:18px;padding-bottom:18px}
-    .brand-lockup{gap:10px}
-    .brand-logo{width:52px;height:52px}
-    .brand h1{font-size:38px;line-height:.86}
-    .brand p{font-size:9px;letter-spacing:.22em}
-    .status-pill{min-width:0;padding:10px 12px}
-    .card-pad{padding:14px}
+    body{
+      padding:12px 10px 34px;
+      overflow-x:hidden;
+    }
+    .shell{max-width:100%;overflow-x:hidden}
+
+    .topbar{
+      display:block;
+      gap:0;
+      margin-bottom:14px;
+      padding-bottom:14px;
+    }
+    .brand-lockup{
+      max-width:100%;
+    }
+    .brand-logo{
+      width:min(82vw,360px);
+      height:auto;
+      max-height:82px;
+    }
+    .brand p{
+      margin-top:10px;
+      font-size:8px;
+      letter-spacing:.18em;
+    }
+    .status-pill{
+      display:none;
+    }
+
+    .grid{
+      display:block;
+    }
+    .card-pad{padding:13px}
     .card{box-shadow:none}
-    .connection-strip{padding:10px 11px;margin-bottom:14px}
-    .connection-strip .v{max-width:255px;font-size:10px}
-    .script-box{grid-template-columns:1fr;margin-bottom:14px}
-    .script-box input{font-size:11px;line-height:1.4}
-    .section{margin-bottom:24px}
-    .section-title{font-size:10px;margin-bottom:13px;letter-spacing:.18em}
-    .source-grid{grid-template-columns:repeat(3,1fr);gap:6px}
-    .source-btn{min-height:76px;padding:12px 4px}
-    .source-code{font-size:22px;margin-bottom:6px}
-    .source-label{font-size:7px;letter-spacing:.10em;line-height:1.45}
-    .row,.row-3,.item-grid,.item-grid-3,.credit-box{grid-template-columns:1fr}
-    .field{margin-bottom:15px}
-    label{font-size:9px;letter-spacing:.16em}
-    input,select,textarea{font-size:16px;padding:7px 0 10px}
-    .b2b-panel{padding:12px;margin-top:12px}
-    .add-cafe{margin-left:-12px;margin-right:-12px;margin-bottom:-12px;padding:14px}
+
+    .connection-strip{
+      padding:9px 10px;
+      margin-bottom:13px;
+    }
+    .connection-strip .k{font-size:8px}
+    .connection-strip .v{
+      max-width:245px;
+      font-size:9px;
+    }
+    .connection-strip .toggle{font-size:9px}
+    .script-box{
+      grid-template-columns:1fr;
+      margin-bottom:14px;
+    }
+    .script-box input{
+      font-size:11px;
+      line-height:1.4;
+    }
+
+    .section{margin-bottom:22px}
+    .section-title{
+      font-size:9px;
+      margin-bottom:12px;
+      letter-spacing:.16em;
+    }
+
+    .source-grid{
+      grid-template-columns:repeat(3,1fr);
+      gap:6px;
+    }
+    .source-btn{
+      min-height:70px;
+      padding:10px 4px;
+    }
+    .source-code{
+      font-size:20px;
+      margin-bottom:5px;
+    }
+    .source-label{
+      font-size:6.8px;
+      letter-spacing:.08em;
+      line-height:1.45;
+    }
+
+    .row,.row-3,.item-grid,.item-grid-3,.credit-box{
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+    .field{margin-bottom:13px}
+    label{
+      font-size:8.5px;
+      letter-spacing:.14em;
+    }
+    input,select,textarea{
+      font-size:16px;
+      padding:7px 0 10px;
+    }
+
+    .b2b-panel{
+      padding:12px;
+      margin-top:12px;
+    }
+    .add-cafe{
+      margin-left:-12px;
+      margin-right:-12px;
+      margin-bottom:-12px;
+      padding:14px;
+    }
     .credit-box{gap:7px}
-    .credit-stat{padding:10px}.credit-status{font-size:11px;padding:10px}
-    .order-id{padding:14px 15px;margin-bottom:16px}.order-id .id{font-size:15px}.order-id .note{font-size:8px}
-    .item{padding:13px}.item-grid-3{margin-top:8px}.item-head{margin-bottom:10px}
-    .add-item{padding:14px;margin-top:10px}
-    .side{position:fixed;left:0;right:0;bottom:0;background:rgba(255,242,227,.96);border-top:1px solid var(--line-dark);padding:8px 10px;z-index:40;backdrop-filter:blur(10px)}
-    .summary-card{display:none}
-    .secondary-submit{display:none}
-    .submit{padding:16px 12px;font-size:11px}
-    .hint[style]{display:none}
-    .toast{left:10px;right:10px;bottom:72px;max-width:none}
-    .diag{max-height:86px;font-size:10px}
+    .credit-stat{padding:10px}
+    .credit-status{
+      font-size:10.5px;
+      padding:10px;
+    }
+
+    .order-id{
+      padding:14px 14px;
+      margin-bottom:15px;
+    }
+    .order-id .id{font-size:14px}
+    .order-id .note{font-size:8px}
+
+    .item{padding:12px}
+    .item-grid-3{margin-top:8px}
+    .item-head{margin-bottom:10px}
+    .add-item{
+      padding:14px;
+      margin-top:10px;
+    }
+
+    .side{
+      position:static;
+      margin-top:14px;
+      padding:0;
+      background:transparent;
+      border-top:0;
+      backdrop-filter:none;
+      z-index:auto;
+    }
+    .summary-card{
+      display:block;
+      padding:16px;
+      margin-bottom:12px;
+    }
+    .summary-grid{
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+    .submit{
+      padding:16px 12px;
+      font-size:11px;
+    }
+    .secondary-submit{display:block}
+    .hint[style]{display:block;font-size:11px}
+    .toast{
+      left:10px;
+      right:10px;
+      bottom:18px;
+      max-width:none;
+    }
+    .diag{
+      max-height:86px;
+      font-size:10px;
+    }
     .row-actions .mini-btn{flex:1}
   }
 </style>
@@ -348,10 +461,7 @@
   <header class="topbar">
     <div class="brand">
       <div class="brand-lockup">
-        <!-- Put your logo file next to this HTML as: ikkis-logo.png
-             Or replace src with a hosted logo URL. If missing, the text logo still works. -->
         <img class="brand-logo" src="ikkis-logo.png" alt="IKKIS Coffee Roasters logo" onerror="this.classList.add('is-hidden')" />
-        <h1>Ikkis Coffee Roasters</h1>
       </div>
       <p>KOT v2 · Order Entry System</p>
     </div>
