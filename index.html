@@ -1,537 +1,1207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ikkis Coffee Roasters — Order Entry</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IKKIS KOT v2 — Order Entry</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg:    #F0EBE1;
-  --dark:  #1E1208;
-  --brown: #5C3317;
-  --rust:  #C05A20;
-  --line:  #C8BEA8;
-  --muted: #8A7B6A;
-  --mono:  'IBM Plex Mono', monospace;
-  --sans:  'IBM Plex Sans', sans-serif;
-  --serif: 'Playfair Display', serif;
-}
-body { background: var(--bg); font-family: var(--sans); color: var(--dark); min-height: 100vh; padding-bottom: 80px; }
+  :root{
+    --cream:#FFF2E3;
+    --paper:#FAF7F2;
+    --warm:#FFF5EB;
+    --ink:#1A1A1A;
+    --near:#121212;
+    --brown:#1E1208;
+    --copper:#B95E2C;
+    --copper-dark:#944719;
+    --blue:#718F98;
+    --line:#D8C9B5;
+    --line-dark:#BBA991;
+    --muted:#75695E;
+    --green:#2F7D4D;
+    --yellow:#9B731D;
+    --red:#A83232;
+    --shadow:0 24px 60px rgba(30,18,8,.10);
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'Inter', sans-serif;
+    --serif:'Cormorant Garamond', serif;
+  }
 
-.page { max-width: 680px; margin: 0 auto; padding: 48px 32px; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(circle at top left, rgba(185,94,44,.10), transparent 32rem),
+      linear-gradient(180deg,var(--cream),var(--paper));
+    color:var(--brown);
+    font-family:var(--sans);
+    min-height:100vh;
+    padding:34px 18px 80px;
+  }
 
-/* Header */
-.header { padding-bottom: 20px; border-bottom: 2px solid var(--dark); margin-bottom: 40px; }
-.header h1 { font-family: var(--serif); font-size: 42px; color: var(--dark); line-height: 1; margin-bottom: 6px; }
-.header-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  .shell{max-width:980px;margin:0 auto}
 
-/* Script URL */
-.script-url-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border: 1px solid var(--line); background: rgba(255,255,255,0.3); margin-bottom: 40px; }
-.script-url-row label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap; }
-.script-url-row input { flex: 1; border: none; background: none; font-family: var(--mono); font-size: 12px; color: var(--dark); outline: none; }
-.script-url-row input::placeholder { color: var(--line); }
+  .topbar{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:20px;
+    align-items:end;
+    border-bottom:2px solid var(--brown);
+    padding-bottom:22px;
+    margin-bottom:26px;
+  }
+  .brand h1{
+    font-family:var(--serif);
+    font-size:clamp(38px,7vw,72px);
+    line-height:.82;
+    letter-spacing:-.035em;
+    font-weight:700;
+  }
+  .brand p{
+    margin-top:12px;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .status-pill{
+    border:1px solid var(--line-dark);
+    padding:12px 14px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    min-width:190px;
+    text-align:right;
+    background:rgba(255,255,255,.32);
+  }
+  .status-pill strong{display:block;color:var(--brown);font-size:13px;margin-bottom:4px}
+  .status-pill.ok strong{color:var(--green)}
+  .status-pill.err strong{color:var(--red)}
 
-/* Section label */
-.sec-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+  .grid{display:grid;grid-template-columns:1.08fr .62fr;gap:24px;align-items:start}
+  .card{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.34);
+    box-shadow:var(--shadow);
+  }
+  .card-pad{padding:26px}
+  .side{position:sticky;top:18px}
 
-/* Field */
-.field { margin-bottom: 28px; }
-.field-label { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--brown); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
-.field-label span { color: var(--rust); }
-.field input, .field select, .field textarea {
-  width: 100%; background: none; border: none; border-bottom: 1.5px solid var(--brown);
-  font-family: var(--mono); font-size: 18px; color: var(--dark);
-  padding: 6px 0 10px; outline: none; appearance: none; border-radius: 0; transition: border-color 0.2s;
-}
-.field input:focus, .field select:focus, .field textarea:focus { border-bottom-color: var(--rust); }
-.field textarea { resize: none; min-height: 52px; line-height: 1.5; }
-.field select { cursor: pointer; }
-.field input::placeholder { color: var(--line); }
+  .section{margin-bottom:30px}
+  .section:last-child{margin-bottom:0}
+  .section-title{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color:var(--copper);
+    margin-bottom:18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .section-title::after{content:"";height:1px;background:var(--line);flex:1}
 
-/* Source selector */
-.source-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.source-btn {
-  border: 1.5px solid var(--line); background: none; padding: 14px 10px;
-  cursor: pointer; text-align: center; transition: all 0.15s; font-family: var(--mono);
-}
-.source-btn:hover { border-color: var(--brown); }
-.source-btn.selected { border-color: var(--rust); background: rgba(192,90,32,0.07); }
-.source-code { font-size: 20px; font-weight: 500; color: var(--dark); display: block; margin-bottom: 4px; }
-.source-label { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; display: block; line-height: 1.4; }
-.source-btn.selected .source-code { color: var(--rust); }
-.source-btn.selected .source-label { color: var(--rust); }
+  .script-box{
+    display:grid;
+    grid-template-columns:1fr auto auto;
+    gap:10px;
+    border:1px solid var(--line-dark);
+    background:rgba(255,255,255,.45);
+    padding:10px;
+    margin-bottom:22px;
+  }
+  .script-box input{
+    border:none;background:transparent;outline:none;
+    font-family:var(--mono);font-size:12px;color:var(--brown);
+    min-width:0;
+  }
+  button,input,select,textarea{font-family:inherit}
+  .mini-btn{
+    border:1px solid var(--line-dark);
+    background:transparent;
+    color:var(--brown);
+    padding:9px 12px;
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:.15s ease;
+  }
+  .mini-btn:hover{border-color:var(--copper);color:var(--copper)}
+  .mini-btn:disabled{opacity:.5;cursor:not-allowed}
+  .mini-btn.primary{background:var(--brown);color:var(--cream);border-color:var(--brown)}
+  .mini-btn.primary:hover{background:var(--copper);border-color:var(--copper);color:#fff}
 
-/* City autocomplete */
-.city-wrap { position: relative; }
-.city-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: #FAF7F0; border: 1px solid var(--line); z-index: 50; display: none; max-height: 200px; overflow-y: auto; }
-.city-suggestions.open { display: block; }
-.city-sug-item { padding: 10px 14px; font-family: var(--mono); font-size: 14px; cursor: pointer; border-bottom: 1px solid #EEE8DC; transition: background 0.1s; }
-.city-sug-item:hover, .city-sug-item.active { background: var(--line); }
-.city-sug-item:last-child { border-bottom: none; }
+  .source-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .source-btn{
+    border:1px solid var(--line-dark);
+    background:rgba(255,255,255,.24);
+    min-height:88px;
+    padding:15px 12px;
+    cursor:pointer;
+    text-align:center;
+    transition:.16s ease;
+  }
+  .source-btn:hover{transform:translateY(-1px);border-color:var(--brown)}
+  .source-btn.active{background:var(--brown);color:var(--cream);border-color:var(--brown)}
+  .source-code{font-family:var(--mono);font-weight:600;font-size:24px;display:block;margin-bottom:8px;color:var(--copper)}
+  .source-btn.active .source-code{color:var(--cream)}
+  .source-label{font-family:var(--mono);font-size:9px;line-height:1.45;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .source-btn.active .source-label{color:rgba(255,242,227,.76)}
 
-/* Order ID box */
-.order-id-box { background: var(--dark); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; }
-.oid-left { display: flex; flex-direction: column; gap: 6px; }
-.oid-label { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 2px; text-transform: uppercase; }
-.oid-value { font-family: var(--mono); font-size: 20px; font-weight: 500; color: white; letter-spacing: 1px; }
-.oid-right { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.35); text-align: right; line-height: 1.6; }
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .row-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .field{margin-bottom:18px}
+  label{
+    display:block;
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.19em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  label .req{color:var(--copper)}
+  input,select,textarea{
+    width:100%;
+    border:none;
+    border-bottom:1.5px solid var(--brown);
+    background:transparent;
+    color:var(--brown);
+    outline:none;
+    border-radius:0;
+    padding:8px 0 11px;
+    font-size:16px;
+  }
+  textarea{resize:vertical;min-height:54px;line-height:1.45}
+  input:focus,select:focus,textarea:focus{border-bottom-color:var(--copper)}
+  input::placeholder{color:#B7A996}
+  select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 14px) 50%,calc(100% - 9px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:25px}
 
-hr { border: none; border-top: 1px solid var(--line); margin: 36px 0; }
+  .hint{font-size:12px;line-height:1.5;color:var(--muted);margin-top:8px}
+  .hint code{background:rgba(255,255,255,.5);padding:1px 5px;font-family:var(--mono);font-size:11px}
 
-/* Urgent */
-.urgent-row { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; padding: 8px 0; margin-bottom: 36px; border: none; background: none; width: 100%; text-align: left; }
-.urg-box { width: 18px; height: 18px; border: 1.5px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; transition: all 0.15s; }
-.urgent-row.on .urg-box { background: var(--rust); border-color: var(--rust); color: white; }
-.urgent-row.on { color: var(--rust); }
+  .b2b-panel{
+    display:none;
+    border:1px solid var(--line);
+    background:rgba(113,143,152,.10);
+    padding:18px;
+    margin-top:16px;
+  }
+  .b2b-panel.visible{display:block}
+  .credit-box{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-top:14px;
+  }
+  .credit-stat{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.5);
+    padding:12px 10px;
+  }
+  .credit-stat .v{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--brown)}
+  .credit-stat .k{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin-top:5px}
+  .credit-status{
+    grid-column:1/-1;
+    padding:12px 14px;
+    border:1px solid var(--line-dark);
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.04em;
+  }
+  .credit-status.green{background:rgba(47,125,77,.10);color:var(--green);border-color:rgba(47,125,77,.30)}
+  .credit-status.yellow{background:rgba(155,115,29,.12);color:var(--yellow);border-color:rgba(155,115,29,.34)}
+  .credit-status.red{background:rgba(168,50,50,.11);color:var(--red);border-color:rgba(168,50,50,.36)}
 
-/* Item card */
-.item-card { background: rgba(255,255,255,0.35); border: 1px solid var(--line); padding: 18px 20px; margin-bottom: 10px; }
-.item-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.item-num { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
-.item-remove { border: none; background: none; font-family: var(--mono); font-size: 11px; color: var(--muted); cursor: pointer; letter-spacing: 1px; text-transform: uppercase; padding: 0; transition: color 0.15s; }
-.item-remove:hover { color: var(--rust); }
-.item-grid { display: grid; grid-template-columns: 1fr 1fr 100px; gap: 16px; margin-bottom: 14px; }
-.item-grid-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.item-field label { display: block; font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
-.item-field label span { color: var(--rust); }
-.item-field select, .item-field input {
-  width: 100%; background: none; border: none; border-bottom: 1px solid var(--line);
-  font-family: var(--mono); font-size: 14px; color: var(--dark);
-  padding: 5px 0 7px; outline: none; appearance: none; border-radius: 0; transition: border-color 0.15s;
-}
-.item-field select:focus, .item-field input:focus { border-bottom-color: var(--rust); }
-.item-field input::placeholder { color: var(--line); }
+  .add-cafe{display:none;margin-top:16px;border-top:1px solid var(--line);padding-top:16px;background:rgba(255,255,255,.4);padding:18px;margin-left:-18px;margin-right:-18px;margin-bottom:-18px;border-bottom-left-radius:4px;border-bottom-right-radius:4px}
+  .add-cafe.visible{display:block}
+  .add-cafe-title{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--copper);margin-bottom:14px}
 
-/* Add item */
-.add-item-btn { width: 100%; border: 1.5px dashed var(--line); background: none; padding: 16px; font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; margin-bottom: 24px; }
-.add-item-btn:hover { border-color: var(--brown); color: var(--brown); }
+  .order-id{
+    background:var(--brown);
+    color:var(--cream);
+    padding:18px 20px;
+    display:flex;
+    justify-content:space-between;
+    gap:18px;
+    align-items:center;
+    margin-bottom:20px;
+  }
+  .order-id .small{font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,242,227,.45);margin-bottom:6px}
+  .order-id .id{font-family:var(--mono);font-size:18px;font-weight:600;letter-spacing:.04em}
+  .order-id .note{font-family:var(--mono);font-size:10px;line-height:1.45;color:rgba(255,242,227,.46);text-align:right}
 
-/* Summary */
-.summary { display: none; border-top: 1px solid var(--line); padding-top: 14px; margin-bottom: 36px; gap: 28px; }
-.summary.visible { display: flex; }
-.sum-stat { display: flex; flex-direction: column; gap: 2px; }
-.sum-val { font-family: var(--mono); font-size: 22px; font-weight: 500; }
-.sum-lbl { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+  .urgent{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.17em;
+    text-transform:uppercase;
+    cursor:pointer;
+    padding:8px 0;
+  }
+  .checkbox{width:18px;height:18px;border:1.5px solid var(--line-dark);display:grid;place-items:center;color:#fff}
+  .urgent.active{color:var(--copper)}
+  .urgent.active .checkbox{background:var(--copper);border-color:var(--copper)}
 
-/* Submit */
-.submit-btn { width: 100%; background: var(--rust); border: none; padding: 20px; font-family: var(--mono); font-size: 13px; font-weight: 500; color: white; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-.submit-btn:hover { background: #A04818; }
-.submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .items{display:flex;flex-direction:column;gap:12px}
+  .item{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.36);
+    padding:18px;
+  }
+  .item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .item-title{font-family:var(--mono);font-size:10px;letter-spacing:.20em;text-transform:uppercase;color:var(--muted)}
+  .remove{border:none;background:transparent;color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+  .remove:hover{color:var(--red)}
+  .item-grid{display:grid;grid-template-columns:1.6fr .75fr .75fr;gap:14px}
+  .item-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  .item-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px}
+  .price-field{display:none}
+  .is-b2b .price-field{display:block}
+  .price-field input{font-weight:600}
+  .price-auto-tag{display:inline-block;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--green);margin-left:6px;text-transform:uppercase}
 
-/* Toast */
-.toast { position: fixed; bottom: 24px; right: 24px; background: var(--dark); color: white; font-family: var(--mono); font-size: 11px; letter-spacing: 0.5px; padding: 14px 20px; opacity: 0; transform: translateY(10px); transition: all 0.25s; pointer-events: none; z-index: 999; max-width: 320px; line-height: 1.5; }
-.toast.show { opacity: 1; transform: translateY(0); }
-.toast.ok  { background: #2A5C1A; }
-.toast.err { background: #8B0000; }
-.spin { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: sp 0.7s linear infinite; flex-shrink: 0; }
-@keyframes sp { to { transform: rotate(360deg); } }
+  .add-item{
+    width:100%;
+    border:1.5px dashed var(--line-dark);
+    background:transparent;
+    color:var(--muted);
+    padding:17px;
+    margin-top:14px;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .add-item:hover{color:var(--copper);border-color:var(--copper)}
 
-@media (max-width: 600px) {
-  .page { padding: 32px 20px; }
-  .header h1 { font-size: 30px; }
-  .source-grid { grid-template-columns: repeat(3,1fr); }
-  .item-grid { grid-template-columns: 1fr 1fr; }
-  .item-grid > *:nth-child(3) { grid-column: 1 / -1; }
-}
+  .summary-card{background:var(--brown);color:var(--cream);padding:22px;margin-bottom:18px}
+  .summary-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}
+  .summary-title{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,242,227,.55)}
+  .summary-id{font-family:var(--mono);font-size:15px;line-height:1.35;margin-top:6px;word-break:break-all}
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sum-box{border:1px solid rgba(255,242,227,.18);padding:12px}
+  .sum-box .v{font-family:var(--mono);font-size:18px;font-weight:600}
+  .sum-box .k{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:.18em;color:rgba(255,242,227,.45);margin-top:5px}
+
+  .submit{
+    width:100%;
+    background:var(--copper);
+    border:none;
+    color:#fff;
+    padding:19px 18px;
+    cursor:pointer;
+    font-family:var(--mono);
+    font-weight:600;
+    font-size:12px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    transition:.15s ease;
+  }
+  .submit:hover{background:var(--copper-dark)}
+  .submit:disabled{opacity:.48;cursor:not-allowed}
+  .secondary-submit{background:transparent;color:var(--brown);border:1px solid var(--line-dark);margin-top:10px}
+  .secondary-submit:hover{background:rgba(30,18,8,.05)}
+
+  .toast{
+    position:fixed;
+    right:22px;bottom:22px;
+    background:var(--brown);
+    color:#fff;
+    padding:14px 18px;
+    max-width:360px;
+    font-family:var(--mono);
+    font-size:12px;
+    line-height:1.5;
+    opacity:0;
+    transform:translateY(10px);
+    transition:.2s ease;
+    z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateY(0)}
+  .toast.ok{background:var(--green)}
+  .toast.err{background:var(--red)}
+  .toast.warn{background:var(--yellow);color:#fff}
+
+  .spinner{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin-right:8px;vertical-align:-2px}
+  .spinner-dark{border-color:rgba(30,18,8,.25);border-top-color:var(--brown)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Diagnostic panel for debugging */
+  .diag{
+    margin-top:14px;
+    padding:12px;
+    background:rgba(30,18,8,.05);
+    border:1px solid var(--line);
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--brown);
+    max-height:140px;
+    overflow-y:auto;
+    display:none;
+  }
+  .diag.visible{display:block}
+  .diag-line{margin:2px 0}
+  .diag-line.err{color:var(--red)}
+  .diag-line.ok{color:var(--green)}
+
+  @media(max-width:860px){
+    .grid{grid-template-columns:1fr}
+    .side{position:static}
+    .topbar{grid-template-columns:1fr}
+    .status-pill{text-align:left}
+  }
+  @media(max-width:620px){
+    body{padding:18px 12px 60px}
+    .card-pad{padding:19px}
+    .source-grid,.row,.row-3,.item-grid,.item-grid-2,.item-grid-3,.credit-box{grid-template-columns:1fr}
+    .script-box{grid-template-columns:1fr}
+    .summary-grid{grid-template-columns:1fr 1fr}
+    .row-actions .mini-btn{flex:1;justify-content:center}
+  }
 </style>
 </head>
 <body>
-<div class="page">
-
-  <!-- Header -->
-  <div class="header">
-    <h1>Ikkis Coffee Roasters</h1>
-    <div class="header-sub">Order Entry System</div>
-  </div>
-
-  <!-- Script URL -->
-  <div class="script-url-row">
-    <label>Script URL</label>
-    <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/…/exec" />
-  </div>
-
-  <!-- Customer Details -->
-  <div class="sec-label">Customer Details</div>
-
-  <!-- Source -->
-  <div class="field">
-    <div class="field-label">Source <span>*</span></div>
-    <div class="source-grid">
-      <button class="source-btn" onclick="selectSource('S')" id="src-S">
-        <span class="source-code">S</span>
-        <span class="source-label">Shopify<br>B2C</span>
-      </button>
-      <button class="source-btn" onclick="selectSource('W')" id="src-W">
-        <span class="source-code">W</span>
-        <span class="source-label">WhatsApp / Phone<br>B2C</span>
-      </button>
-      <button class="source-btn" onclick="selectSource('B')" id="src-B">
-        <span class="source-code">B</span>
-        <span class="source-label">B2B<br>Wholesale</span>
-      </button>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <h1>Ikkis Coffee Roasters</h1>
+      <p>KOT v2 · Order Entry System</p>
     </div>
-  </div>
-
-  <div class="field">
-    <div class="field-label">Customer Name <span>*</span></div>
-    <input type="text" id="customerName" autocomplete="off" />
-  </div>
-
-  <div class="field">
-    <div class="field-label">City</div>
-    <div class="city-wrap">
-      <input type="text" id="cityInput" autocomplete="off" oninput="onCityInput()" onblur="hideSuggestions()" onkeydown="cityKeydown(event)" />
-      <div class="city-suggestions" id="citySugg"></div>
+    <div class="status-pill" id="connectionStatus">
+      <strong>Not connected</strong>
+      Add Web App URL
     </div>
+  </header>
+
+  <div class="grid">
+    <main class="card card-pad" id="formCard">
+      <div class="script-box">
+        <input id="webAppUrl" placeholder="Paste Google Apps Script Web App URL …/exec" />
+        <button class="mini-btn" onclick="saveUrl()">Save</button>
+        <button class="mini-btn" id="testBtn" onclick="testConnection()">Test</button>
+      </div>
+      <div class="diag" id="diag"></div>
+
+      <section class="section">
+        <div class="section-title">1 · Source</div>
+        <div class="source-grid">
+          <button class="source-btn" id="sourceS" onclick="selectSource('S')">
+            <span class="source-code">S</span>
+            <span class="source-label">Shopify<br>B2C</span>
+          </button>
+          <button class="source-btn" id="sourceW" onclick="selectSource('W')">
+            <span class="source-code">W</span>
+            <span class="source-label">WhatsApp / Phone<br>B2C</span>
+          </button>
+          <button class="source-btn" id="sourceB" onclick="selectSource('B')">
+            <span class="source-code">B</span>
+            <span class="source-label">B2B<br>Wholesale</span>
+          </button>
+        </div>
+
+        <div class="b2b-panel" id="b2bPanel">
+          <div class="row">
+            <div class="field">
+              <label>Café Account <span class="req">*</span></label>
+              <select id="cafeSelect" onchange="onCafeSelected()">
+                <option value="">Load cafés first…</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Manual Café / New Café</label>
+              <input id="manualCafeName" placeholder="Only if not in dropdown" oninput="onManualCafeInput()" />
+            </div>
+          </div>
+          <div class="row-actions">
+            <button class="mini-btn" id="loadCafesBtn" onclick="loadCafes(true)">Load Cafés</button>
+            <button class="mini-btn" id="addCafeToggleBtn" onclick="toggleAddCafe()">+ Add Café</button>
+            <button class="mini-btn" id="refreshCreditBtn" onclick="loadCredit(true)">Refresh Credit</button>
+          </div>
+
+          <div class="add-cafe" id="addCafePanel">
+            <div class="add-cafe-title">Register New Café Partner</div>
+            <div class="row">
+              <div class="field"><label>Café Name <span class="req">*</span></label><input id="newCafeName" placeholder="e.g. Brew House"/></div>
+              <div class="field"><label>GST Entity (Legal Name)</label><input id="newGstEntity" placeholder="e.g. Brew House Pvt Ltd"/></div>
+            </div>
+            <div class="row-3">
+              <div class="field"><label>City</label><input id="newCafeCity" placeholder="Chandigarh"/></div>
+              <div class="field"><label>Phone</label><input id="newCafePhone" placeholder="+91 …"/></div>
+              <div class="field"><label>Credit Limit (₹)</label><input id="newCreditLimit" type="number" value="75000" /></div>
+            </div>
+            <div class="row-3">
+              <div class="field"><label>Opening Balance (₹)</label><input id="newOpeningBalance" type="number" value="0" placeholder="Existing dues"/></div>
+              <div class="field"><label>Has GST</label><select id="newHasGst"><option>No</option><option>Yes</option></select></div>
+              <div class="field"><label>GST State</label><input id="newGstState" placeholder="Punjab / Chandigarh" /></div>
+            </div>
+            <div class="row-3">
+              <div class="field"><label>Shipping</label><select id="newShipping"><option>Yes</option><option>No</option></select></div>
+              <div class="field" style="grid-column:span 2"><label>Notes</label><input id="newCafeNotes" placeholder="Optional internal note"/></div>
+            </div>
+            <div class="row-actions">
+              <button class="mini-btn primary" id="createCafeBtn" onclick="submitNewCafe()">Create Café</button>
+              <button class="mini-btn" onclick="toggleAddCafe()">Cancel</button>
+            </div>
+            <div class="hint">Calls <code>action=addCafe</code> via POST. Creates the master row and Apps Script will auto-create the café ledger tab on first order.</div>
+          </div>
+
+          <div class="credit-box" id="creditBox">
+            <div class="credit-stat"><div class="v" id="creditLimit">—</div><div class="k">Limit</div></div>
+            <div class="credit-stat"><div class="v" id="creditOutstanding">—</div><div class="k">Outstanding</div></div>
+            <div class="credit-stat"><div class="v" id="creditRemaining">—</div><div class="k">Remaining</div></div>
+            <div class="credit-stat"><div class="v" id="creditAfter">—</div><div class="k">After This Order</div></div>
+            <div class="credit-status" id="creditStatus">Select café to show credit status.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-title">2 · Customer Details</div>
+        <div class="order-id">
+          <div>
+            <div class="small">Order ID</div>
+            <div class="id" id="orderId">—</div>
+          </div>
+          <div class="note">Auto-generated<br/>before submit</div>
+        </div>
+
+        <div class="field">
+          <label id="customerLabel">Customer Name <span class="req">*</span></label>
+          <input id="customerName" placeholder="Customer / café name" oninput="updatePreview()" />
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>City</label>
+            <input id="city" placeholder="Chandigarh" oninput="updatePreview()" />
+          </div>
+          <div class="field">
+            <label>Phone / Notes</label>
+            <input id="phone" placeholder="Phone or internal note" oninput="updatePreview()" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Dispatch Date <span class="req">*</span></label>
+            <input id="dispatchDate" type="date" onchange="updatePreview()" />
+          </div>
+          <div class="field">
+            <label>Submitted</label>
+            <input id="submittedPreview" disabled />
+          </div>
+        </div>
+        <button class="urgent" id="urgentBtn" onclick="toggleUrgent()" type="button"><span class="checkbox" id="urgentCheck"></span> Mark as urgent</button>
+      </section>
+
+      <section class="section">
+        <div class="section-title">3 · Items</div>
+        <div class="items" id="items"></div>
+        <button class="add-item" onclick="addItem()" type="button">+ Add Coffee Item</button>
+      </section>
+    </main>
+
+    <aside class="side">
+      <div class="summary-card">
+        <div class="summary-top">
+          <div>
+            <div class="summary-title">Current Ticket</div>
+            <div class="summary-id" id="summaryOrderId">—</div>
+          </div>
+          <div class="summary-title" id="summarySource">No source</div>
+        </div>
+        <div class="summary-grid">
+          <div class="sum-box"><div class="v" id="sumLines">0</div><div class="k">Lines</div></div>
+          <div class="sum-box"><div class="v" id="sumBags">0</div><div class="k">Bags</div></div>
+          <div class="sum-box"><div class="v" id="sumKg">0.00</div><div class="k">Kg</div></div>
+          <div class="sum-box"><div class="v" id="sumAmount">Rs 0</div><div class="k">B2B Amount</div></div>
+        </div>
+      </div>
+      <button class="submit" id="submitBtn" onclick="submitOrder()">Generate Order Slip</button>
+      <button class="submit secondary-submit" onclick="resetForm()" type="button">Clear Form</button>
+      <p class="hint" style="margin-top:16px">B2B orders require price/kg. The form auto-fills from <strong>Cafe_Pricing</strong> when available; otherwise enter price manually.</p>
+    </aside>
   </div>
-
-  <div class="field">
-    <div class="field-label">Phone / Notes</div>
-    <input type="text" id="phone" />
-  </div>
-
-  <!-- Order ID box -->
-  <div class="order-id-box">
-    <div class="oid-left">
-      <div class="oid-label">Order ID</div>
-      <div class="oid-value" id="orderId">—</div>
-    </div>
-    <div class="oid-right">Auto-generated<br>on name entry</div>
-  </div>
-
-  <div class="field">
-    <div class="field-label">Dispatch Date <span>*</span></div>
-    <input type="date" id="dispatchDate" />
-  </div>
-
-  <button class="urgent-row" id="urgentRow" onclick="toggleUrgent()">
-    <div class="urg-box" id="urgBox"></div>
-    <span id="urgLabel">Mark as Urgent</span>
-  </button>
-
-  <hr style="margin-top:0;">
-
-  <!-- Items -->
-  <div class="sec-label">Items</div>
-  <div id="itemsArea"></div>
-  <button class="add-item-btn" onclick="addItem()">+ Add Coffee Item</button>
-
-  <div class="summary" id="summary">
-    <div class="sum-stat"><div class="sum-val" id="sumLines">0</div><div class="sum-lbl">Lines</div></div>
-    <div class="sum-stat"><div class="sum-val" id="sumBags">0</div><div class="sum-lbl">Total Bags</div></div>
-    <div class="sum-stat"><div class="sum-val" id="sumKg">0.0</div><div class="sum-lbl">Est. KG</div></div>
-  </div>
-
-  <button class="submit-btn" id="submitBtn" onclick="submitOrder()">
-    <span id="submitLabel">Generate Order Slip</span>
-  </button>
-
 </div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Script URL ──
-const scriptUrlEl = document.getElementById('scriptUrl');
+'use strict';
 
-// Both script URLs — order sent to ALL simultaneously
-// SCRIPT_URLS[0] is also used for doGet (order counter) — keep new script first
-const SCRIPT_URLS = [
-  'https://script.google.com/macros/s/AKfycbzrbZi2E6eXEZXLspm94RxwHR1p2JW6iR3VyQw1vQ0j7-irEP9PMbeXkMafBKbcu-05/exec',
-  ];
-scriptUrlEl.value = '2 scripts connected';
-scriptUrlEl.readOnly = true;
-scriptUrlEl.style.opacity = '0.6';
-
-// ── Products (full list from image) ──
-const PRODUCTS = [
-  'Cafe Arabica',
-  'Cafe Blend',
-  'Mulberry Melt',
-  'Berry Bliss',
-  'Golden Glow',
-  'Flavor Flight',
-  'Morning Mist',
-  'Citrus Cloak',
-  'Deep Desire',
-  'Orange Octave',
-  'House Espresso Blend',
-  'House Espresso Arabica',
-  'Cold Brew Roast',
-  'Cold Brew Liquid',
-  'Filter Blend',
-  'Custom'
+const DEFAULT_PRODUCTS = [
+  'Cafe Arabica','Cafe Blend','Mulberry Melt','Berry Bliss','Golden Glow','Flavor Flight','Morning Mist','Citrus Cloak','Deep Desire','Orange Octave','House Espresso Blend','House Espresso Arabica','Cold Brew Roast','Cold Brew Liquid','Filter Blend','Classic Blend','Single Origin','Robusta','Custom'
 ];
-
-const BAGS   = ['250g','500g','1kg'];
+const BAG_SIZES = ['250g','500g','1kg'];
 const GRINDS = ['Whole Bean','Espresso Home (4.5)','Espresso Pro (3.5)','Pour Over (12)','French Press (15)','Moka Pot (5)','Aeropress (6)','Cold Brew (16)','Custom'];
 
-// ── Indian cities ──
-const CITIES = [
-  'Ahmedabad','Agra','Ajmer','Aligarh','Amritsar','Aurangabad',
-  'Bengaluru','Bhopal','Bhubaneswar','Chandigarh','Chennai','Coimbatore',
-  'Dehradun','Delhi','Dhanbad','Faridabad','Ghaziabad','Gurgaon',
-  'Guwahati','Gwalior','Howrah','Hyderabad','Indore','Jabalpur',
-  'Jaipur','Jalandhar','Jammu','Jodhpur','Kanpur','Kochi','Kolkata',
-  'Kota','Kozhikode','Ludhiana','Lucknow','Madurai','Mangaluru',
-  'Meerut','Mumbai','Mysuru','Nagpur','Nashik','Navi Mumbai',
-  'Noida','Patna','Pune','Raipur','Rajkot','Ranchi','Surat',
-  'Thane','Thiruvananthapuram','Tiruchirappalli','Udaipur','Vadodara',
-  'Varanasi','Vijayawada','Visakhapatnam','Warangal'
-];
+const state = {
+  webAppUrl: localStorage.getItem('IKKIS_KOT_V2_URL') || '',
+  source: '',
+  orderNo: null,
+  orderId: '—',
+  cafes: JSON.parse(localStorage.getItem('IKKIS_KOT_V2_CAFES') || '[]'),
+  selectedCafe: null,
+  cafePricing: {},
+  credit: null,
+  urgent: false,
+  items: [],
+  pendingRequests: 0
+};
 
-// ── Source ──
-let selectedSource = '';
-function selectSource(code) {
-  selectedSource = code;
-  ['S','W','B'].forEach(c => document.getElementById('src-'+c).classList.toggle('selected', c===code));
-  if (currentOrderNum) { const d = new Date(), p = n => String(n).padStart(2,'0'); const date = `${d.getFullYear().toString().slice(2)}${p(d.getMonth()+1)}${p(d.getDate())}`; document.getElementById('orderId').textContent = `${code}-${date}-${currentOrderNum}`; }
-}
+const $ = id => document.getElementById(id);
 
-// ── City autocomplete ──
-let cityHighlight = -1;
-function onCityInput() {
-  const val = document.getElementById('cityInput').value.trim().toLowerCase();
-  const box = document.getElementById('citySugg');
-  if (!val) { box.classList.remove('open'); return; }
-  const matches = CITIES.filter(c => c.toLowerCase().startsWith(val)).slice(0,6);
-  if (!matches.length) { box.classList.remove('open'); return; }
-  cityHighlight = -1;
-  box.innerHTML = matches.map(c => `<div class="city-sug-item" data-val="${c}" onmousedown="selectCity('${c}')">${c}</div>`).join('');
-  box.classList.add('open');
-}
-function selectCity(name) {
-  document.getElementById('cityInput').value = name;
-  document.getElementById('citySugg').classList.remove('open');
-}
-function hideSuggestions() {
-  setTimeout(() => document.getElementById('citySugg').classList.remove('open'), 150);
-}
-function cityKeydown(e) {
-  const box = document.getElementById('citySugg');
-  const its = box.querySelectorAll('.city-sug-item');
-  if (!its.length) return;
-  if (e.key==='ArrowDown')  { e.preventDefault(); cityHighlight=Math.min(cityHighlight+1,its.length-1); }
-  else if (e.key==='ArrowUp') { e.preventDefault(); cityHighlight=Math.max(cityHighlight-1,0); }
-  else if (e.key==='Enter'&&cityHighlight>=0) { e.preventDefault(); selectCity(its[cityHighlight].dataset.val); return; }
-  else if (e.key==='Escape') { box.classList.remove('open'); return; }
-  its.forEach((el,i) => el.classList.toggle('active', i===cityHighlight));
+function init(){
+  $('webAppUrl').value = state.webAppUrl;
+  $('dispatchDate').min = new Date().toISOString().slice(0,10);
+  $('submittedPreview').value = formatDateTime(new Date());
+  addItem();
+  updateConnectionStatus();
+  renderCafeOptions();  // render from localStorage cache immediately
+  updatePreview();
+  if(state.webAppUrl) loadCafes(false);
 }
 
-// ── Order ID — fetched from Sheet via doGet ──
-let currentOrderNum = null;
-let fetchingOrderNum = false;
+document.addEventListener('DOMContentLoaded', init);
 
-async function fetchNextOrderNum() {
-  const url = SCRIPT_URLS[0];
-  try {
-    const res  = await fetch(url + '?action=nextOrderNum');
-    const data = await res.json();
-    return data.next || null;
-  } catch(e) {
-    // fallback: timestamp-based unique number
-    const now = new Date();
-    return String(now.getHours()).padStart(2,'0') +
-           String(now.getMinutes()).padStart(2,'0') +
-           String(now.getSeconds()).padStart(2,'0');
+// ──────────────────────────────────────────────────────────
+// DIAGNOSTICS — visible log so you can SEE what's failing
+// ──────────────────────────────────────────────────────────
+function diag(message, type=''){
+  const box = $('diag');
+  box.classList.add('visible');
+  const line = document.createElement('div');
+  line.className = 'diag-line ' + type;
+  line.textContent = '[' + new Date().toLocaleTimeString() + '] ' + message;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+  // Trim if too many
+  while(box.children.length > 30) box.removeChild(box.firstChild);
+}
+
+// ──────────────────────────────────────────────────────────
+// URL / CONNECTION
+// ──────────────────────────────────────────────────────────
+function saveUrl(){
+  const url = $('webAppUrl').value.trim();
+  if(!url){ toast('Paste Web App URL first.','err'); return; }
+  if(!url.includes('script.google.com')){ toast('That does not look like a Google Apps Script URL.','warn'); }
+  state.webAppUrl = url;
+  localStorage.setItem('IKKIS_KOT_V2_URL', url);
+  updateConnectionStatus();
+  toast('Web App URL saved.', 'ok');
+  diag('URL saved: ' + url.slice(0, 60) + '…', 'ok');
+}
+
+function getUrl(){
+  const url = ($('webAppUrl').value.trim() || state.webAppUrl).trim();
+  if(!url) throw new Error('Paste your Apps Script Web App URL first.');
+  return url;
+}
+
+function updateConnectionStatus(text, cls=''){
+  const el = $('connectionStatus');
+  el.className = 'status-pill ' + cls;
+  if(text){ el.innerHTML = text; return; }
+  if(state.webAppUrl){ el.innerHTML = '<strong>Connected</strong>Web App URL saved'; el.className = 'status-pill ok'; }
+  else { el.innerHTML = '<strong>Not connected</strong>Add Web App URL'; }
+}
+
+// ──────────────────────────────────────────────────────────
+// API HELPERS
+// ──────────────────────────────────────────────────────────
+function startReq(btnId){
+  state.pendingRequests++;
+  if(btnId){
+    const btn = $(btnId);
+    if(btn){
+      btn.disabled = true;
+      btn.dataset.origText = btn.textContent;
+      btn.innerHTML = '<span class="spinner spinner-dark"></span>' + btn.textContent;
+    }
+  }
+}
+function endReq(btnId){
+  state.pendingRequests = Math.max(0, state.pendingRequests - 1);
+  if(btnId){
+    const btn = $(btnId);
+    if(btn){
+      btn.disabled = false;
+      if(btn.dataset.origText){ btn.textContent = btn.dataset.origText; delete btn.dataset.origText; }
+    }
   }
 }
 
-async function updateOrderId() {
-  const name = document.getElementById('customerName').value.trim();
-  if (!name) { document.getElementById('orderId').textContent = '—'; return; }
+async function apiGet(action, params={}){
+  const url = new URL(getUrl());
+  url.searchParams.set('action', action);
+  Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, v == null ? '' : String(v)));
+  diag('GET ' + action + (Object.keys(params).length ? ' ' + JSON.stringify(params) : ''));
+  let res;
+  try{
+    res = await fetch(url.toString(), { method:'GET', redirect:'follow' });
+  }catch(networkErr){
+    diag('Network error: ' + networkErr.message, 'err');
+    throw new Error('Network error — check internet & Web App URL.');
+  }
+  const text = await res.text();
+  let json;
+  try{ json = JSON.parse(text); }
+  catch(e){
+    diag('Bad JSON response: ' + text.slice(0,120), 'err');
+    throw new Error('Apps Script returned non-JSON. Check that the deployment is "Anyone" and a new version is deployed.');
+  }
+  if(json.error){ diag('API error: ' + json.error, 'err'); throw new Error(json.error); }
+  diag('OK ' + action, 'ok');
+  return json;
+}
 
-  // Only fetch once per order session
-  if (!currentOrderNum && !fetchingOrderNum) {
-    fetchingOrderNum = true;
-    document.getElementById('orderId').textContent = '…';
-    currentOrderNum = await fetchNextOrderNum();
-    fetchingOrderNum = false;
+// POST helper — Apps Script doPost handles this
+async function apiPost(action, body){
+  const url = getUrl();
+  diag('POST ' + action);
+  try{
+    await fetch(url, {
+      method:'POST',
+      mode:'no-cors',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, ...body })
+    });
+    diag('POST ' + action + ' sent (no-cors — cannot confirm response)', 'ok');
+    return { status:'sent' };
+  }catch(networkErr){
+    diag('POST network error: ' + networkErr.message, 'err');
+    throw new Error('POST failed: ' + networkErr.message);
+  }
+}
+
+async function testConnection(){
+  $('diag').classList.add('visible');
+  diag('Testing connection…');
+  try{
+    saveUrl();
+    const data = await apiGet('ping');
+    if(data.status === 'ok' || data.ok === true){
+      updateConnectionStatus('<strong>Connected</strong>IKKIS KOT v2 online', 'ok');
+      toast('Connection successful.', 'ok');
+      await loadCafes(false);
+    } else {
+      updateConnectionStatus('<strong>Reached but unexpected response</strong>', 'err');
+      toast('Connected but ping returned: ' + JSON.stringify(data).slice(0,80), 'warn');
+    }
+  }catch(err){
+    updateConnectionStatus('<strong>Connection issue</strong>' + err.message.slice(0,60), 'err');
+    toast(err.message, 'err');
+  }
+}
+
+// ──────────────────────────────────────────────────────────
+// SOURCE SELECTION
+// ──────────────────────────────────────────────────────────
+function selectSource(code){
+  state.source = code;
+  ['S','W','B'].forEach(c => $('source'+c).classList.toggle('active', c===code));
+  $('b2bPanel').classList.toggle('visible', code === 'B');
+  $('formCard').classList.toggle('is-b2b', code === 'B');
+  $('customerLabel').innerHTML = code === 'B' ? 'Café Name <span class="req">*</span>' : 'Customer Name <span class="req">*</span>';
+  if(code === 'B' && state.webAppUrl && !state.cafes.length) loadCafes(false);
+  state.orderNo = null;
+  state.orderId = '—';
+  updatePreview();
+}
+
+function sourceFull(){
+  if(state.source === 'S') return 'S — Shopify B2C';
+  if(state.source === 'W') return 'W — WhatsApp / Phone B2C';
+  if(state.source === 'B') return 'B — B2B Wholesale';
+  return '—';
+}
+
+async function ensureOrderId(){
+  if(state.orderNo) return makeOrderId();
+  try{
+    const data = await apiGet('nextOrderNum');
+    state.orderNo = data.next || fallbackOrderNo();
+  }catch(e){
+    state.orderNo = fallbackOrderNo();
+    toast('Could not reserve sheet number. Using fallback ID.', 'warn');
+  }
+  return makeOrderId();
+}
+function fallbackOrderNo(){
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0') + String(d.getSeconds()).padStart(2,'0');
+}
+function makeOrderId(){
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  const date = String(d.getFullYear()).slice(2) + p(d.getMonth()+1) + p(d.getDate());
+  return `${state.source || 'X'}-${date}-${state.orderNo || '---'}`;
+}
+
+// ──────────────────────────────────────────────────────────
+// CAFÉS
+// ──────────────────────────────────────────────────────────
+async function loadCafes(showToast=true){
+  startReq('loadCafesBtn');
+  try{
+    const data = await apiGet('getCafes');
+    state.cafes = Array.isArray(data.cafes) ? data.cafes : [];
+    localStorage.setItem('IKKIS_KOT_V2_CAFES', JSON.stringify(state.cafes));
+    renderCafeOptions();
+    if(showToast) toast(`Loaded ${state.cafes.length} cafés.`, 'ok');
+    diag(`Loaded ${state.cafes.length} cafés`, 'ok');
+  }catch(err){
+    renderCafeOptions();  // falls back to cached cafés
+    if(showToast) toast('Could not load cafés: ' + err.message, 'err');
+  }finally{
+    endReq('loadCafesBtn');
+  }
+}
+
+function renderCafeOptions(){
+  const sel = $('cafeSelect');
+  const currentValue = sel.value;
+  if(!state.cafes.length){
+    sel.innerHTML = '<option value="">No cafés loaded — click "Load Cafés"</option>';
+    return;
+  }
+  // Sort alphabetically for easy scanning
+  const sorted = [...state.cafes].sort((a,b) => (a.name||'').localeCompare(b.name||''));
+  sel.innerHTML = '<option value="">Select café…</option>' +
+    sorted.map(c => `<option value="${escapeHtml(c.name)}" ${c.name===currentValue?'selected':''}>${escapeHtml(c.name)}${c.city ? ' · '+escapeHtml(c.city) : ''}</option>`).join('');
+}
+
+async function onCafeSelected(){
+  const name = $('cafeSelect').value;
+  state.selectedCafe = state.cafes.find(c => c.name === name) || null;
+  $('manualCafeName').value = '';
+  if(name){
+    $('customerName').value = name;
+    if(state.selectedCafe){
+      $('city').value = state.selectedCafe.city || $('city').value;
+      $('phone').value = state.selectedCafe.phone || $('phone').value;
+    }
+    await Promise.all([ loadCafePricing(name), loadCredit(false) ]);
+  } else {
+    state.cafePricing = {};
+    state.credit = null;
+    updateCreditBox();
+    renderItems();
+  }
+  updatePreview();
+}
+
+function onManualCafeInput(){
+  const name = $('manualCafeName').value.trim();
+  if(name){
+    $('cafeSelect').value = '';
+    $('customerName').value = name;
+    state.selectedCafe = null;
+    state.cafePricing = {};
+    renderItems();
+  }
+  updatePreview();
+}
+
+function currentCafeName(){
+  if(state.source !== 'B') return '';
+  return $('cafeSelect').value || $('manualCafeName').value.trim() || $('customerName').value.trim();
+}
+
+async function loadCafePricing(name){
+  if(!name) return;
+  try{
+    const data = await apiGet('getPricing', { cafe:name });
+    state.cafePricing = data.pricing || {};
+    autoFillItemPrices();
+    renderItems();
+    const count = Object.keys(state.cafePricing).length;
+    if(count) diag(`Pricing loaded: ${count} products for ${name}`, 'ok');
+  }catch(e){
+    state.cafePricing = {};
+    diag('Pricing load failed for ' + name + ': ' + e.message, 'err');
+  }
+}
+
+async function loadCredit(showToast=true){
+  const name = currentCafeName();
+  if(!name){ if(showToast) toast('Select a café first.','warn'); return; }
+  startReq('refreshCreditBtn');
+  try{
+    const data = await apiGet('getCredit', { cafe:name });
+    if(data.error) throw new Error(data.error);
+    state.credit = data;
+    updateCreditBox();
+    if(showToast) toast('Credit refreshed.', 'ok');
+  }catch(err){
+    state.credit = null;
+    updateCreditBox();
+    if(showToast) toast('Credit not found: ' + err.message, 'warn');
+  }finally{
+    endReq('refreshCreditBtn');
+  }
+}
+
+function toggleAddCafe(){
+  const panel = $('addCafePanel');
+  panel.classList.toggle('visible');
+  if(panel.classList.contains('visible')){
+    // Pre-fill from manual cafe input if present
+    const manual = $('manualCafeName').value.trim();
+    if(manual && !$('newCafeName').value) $('newCafeName').value = manual;
+  }
+}
+
+async function submitNewCafe(){
+  const name = $('newCafeName').value.trim();
+  if(!name){ toast('New café name required.', 'err'); $('newCafeName').focus(); return; }
+  if(state.cafes.find(c => (c.name||'').toLowerCase() === name.toLowerCase())){
+    toast('Café "'+name+'" already exists. Select from dropdown.', 'warn');
+    return;
   }
 
-  if (!currentOrderNum) return;
-  const src = selectedSource || 'X';
-  const d = new Date(), p = n => String(n).padStart(2,'0');
-  const date = `${d.getFullYear().toString().slice(2)}${p(d.getMonth()+1)}${p(d.getDate())}`;
-  document.getElementById('orderId').textContent = `${src}-${date}-${currentOrderNum}`;
+  startReq('createCafeBtn');
+  try{
+    // Try POST first (cleanest, handles long names/special chars)
+    // Fallback to GET if POST is blocked by no-cors
+    const body = {
+      name,
+      gstEntity: $('newGstEntity').value.trim(),
+      city: $('newCafeCity').value.trim(),
+      phone: $('newCafePhone').value.trim(),
+      creditLimit: Number($('newCreditLimit').value) || 75000,
+      openingBalance: Number($('newOpeningBalance').value) || 0,
+      hasGst: $('newHasGst').value,
+      gstState: $('newGstState').value.trim(),
+      shipping: $('newShipping').value,
+      notes: $('newCafeNotes').value.trim()
+    };
+
+    // Use GET because we need a confirmation response
+    const data = await apiGet('addCafe', body);
+    if(data.error) throw new Error(data.error);
+
+    toast(`Café "${name}" created.`, 'ok');
+    diag('Café created: ' + name + ' (ID: ' + (data.id||'?') + ')', 'ok');
+
+    // Clear the form
+    ['newCafeName','newGstEntity','newCafeCity','newCafePhone','newGstState','newCafeNotes'].forEach(id => $(id).value='');
+    $('newCreditLimit').value = '75000';
+    $('newOpeningBalance').value = '0';
+    $('newHasGst').value = 'No';
+    $('newShipping').value = 'Yes';
+
+    $('addCafePanel').classList.remove('visible');
+
+    // Reload cafés so dropdown shows new one
+    await loadCafes(false);
+
+    // Auto-select the newly created café
+    $('cafeSelect').value = name;
+    await onCafeSelected();
+
+  }catch(err){
+    toast('Could not create café: ' + err.message, 'err');
+    diag('Add café error: ' + err.message, 'err');
+  }finally{
+    endReq('createCafeBtn');
+  }
 }
 
-document.getElementById('customerName').addEventListener('input', updateOrderId);
-
-// ── Urgent ──
-let isUrgent = false;
-function toggleUrgent() {
-  isUrgent = !isUrgent;
-  document.getElementById('urgentRow').classList.toggle('on', isUrgent);
-  document.getElementById('urgBox').textContent   = isUrgent ? '✓' : '';
-  document.getElementById('urgLabel').textContent = isUrgent ? 'Urgent Order' : 'Mark as Urgent';
+// ──────────────────────────────────────────────────────────
+// ITEMS
+// ──────────────────────────────────────────────────────────
+function addItem(){
+  state.items.push({ id: Date.now() + Math.random(), product:'', bagSize:'250g', qty:1, grind:'Whole Bean', notes:'', pricePerKg:'', priceAutoFilled:false });
+  renderItems();
+  updatePreview();
+}
+function removeItem(id){
+  state.items = state.items.filter(i => String(i.id) !== String(id));
+  renderItems();
+  updatePreview();
+}
+function setItem(id, key, value){
+  const item = state.items.find(i => String(i.id) === String(id));
+  if(!item) return;
+  item[key] = value;
+  if(key === 'product' && state.source === 'B'){
+    const pricing = state.cafePricing[value];
+    if(pricing && pricing.price){
+      item.pricePerKg = pricing.price;
+      item.priceAutoFilled = true;
+    } else {
+      item.priceAutoFilled = false;
+    }
+  }
+  if(key === 'pricePerKg'){ item.priceAutoFilled = false; }
+  renderItems();
+  updatePreview();
 }
 
-// ── Items ──
-let items = [];
-function addItem() {
-  items.push({ id: Date.now(), product:'', bagSize:'', qty:'', grind:'', notes:'' });
-  render();
-}
-function removeItem(id) {
-  items = items.filter(i => i.id !== id);
-  render();
-}
-function setField(id, field, val) {
-  const it = items.find(i => i.id === id);
-  if (it) { it[field] = val; calcSummary(); }
+function autoFillItemPrices(){
+  state.items.forEach(item => {
+    const pricing = state.cafePricing[item.product];
+    if(pricing && pricing.price){
+      item.pricePerKg = pricing.price;
+      item.priceAutoFilled = true;
+    }
+  });
 }
 
-function render() {
-  const area = document.getElementById('itemsArea');
-  area.innerHTML = items.map((it, idx) => `
-    <div class="item-card">
-      <div class="item-card-header">
-        <div class="item-num">Item ${idx+1}</div>
-        <button class="item-remove" onclick="removeItem(${it.id})">Remove</button>
+function productOptions(selected){
+  const fromPricing = Object.keys(state.cafePricing || {});
+  const products = Array.from(new Set([...fromPricing, ...DEFAULT_PRODUCTS]));
+  return '<option value="">Select product…</option>' +
+    products.map(p => `<option value="${escapeHtml(p)}" ${p===selected?'selected':''}>${escapeHtml(p)}</option>`).join('');
+}
+
+function renderItems(){
+  const box = $('items');
+  box.innerHTML = state.items.map((item, index) => `
+    <div class="item">
+      <div class="item-head">
+        <div class="item-title">Item ${index+1}</div>
+        <button class="remove" onclick="removeItem('${item.id}')" type="button">Remove</button>
       </div>
       <div class="item-grid">
-        <div class="item-field" style="grid-column:1/3">
-          <label>Product <span>*</span></label>
-          <select onchange="setField(${it.id},'product',this.value)">
-            <option value="">Select product…</option>
-            ${PRODUCTS.map(p=>`<option ${it.product===p?'selected':''} value="${p}">${p}</option>`).join('')}
-          </select>
+        <div class="field">
+          <label>Product <span class="req">*</span></label>
+          <select onchange="setItem('${item.id}','product',this.value)">${productOptions(item.product)}</select>
         </div>
-        <div class="item-field">
-          <label>Qty <span>*</span></label>
-          <select onchange="setField(${it.id},'qty',this.value)">
-            <option value="">—</option>
-            ${Array.from({length:60},(_,i)=>`<option value="${i+1}" ${it.qty==i+1?'selected':''}>${i+1}</option>`).join('')}
-          </select>
+        <div class="field">
+          <label>Bag Size <span class="req">*</span></label>
+          <select onchange="setItem('${item.id}','bagSize',this.value)">${BAG_SIZES.map(b=>`<option value="${b}" ${b===item.bagSize?'selected':''}>${b}</option>`).join('')}</select>
+        </div>
+        <div class="field">
+          <label>Qty <span class="req">*</span></label>
+          <input type="number" min="1" value="${item.qty}" onchange="setItem('${item.id}','qty',this.value)" />
         </div>
       </div>
-      <div class="item-grid-bottom">
-        <div class="item-field">
-          <label>Bag Size <span>*</span></label>
-          <select onchange="setField(${it.id},'bagSize',this.value)">
-            <option value="">Select…</option>
-            ${BAGS.map(b=>`<option ${it.bagSize===b?'selected':''} value="${b}">${b}</option>`).join('')}
-          </select>
-        </div>
-        <div class="item-field">
+      <div class="item-grid-3">
+        <div class="field">
           <label>Grind</label>
-          <select onchange="setField(${it.id},'grind',this.value)">
-            <option value="">Select…</option>
-            ${GRINDS.map(g=>`<option ${it.grind===g?'selected':''} value="${g}">${g}</option>`).join('')}
-          </select>
+          <select onchange="setItem('${item.id}','grind',this.value)">${GRINDS.map(g=>`<option value="${g}" ${g===item.grind?'selected':''}>${g}</option>`).join('')}</select>
         </div>
-        <div class="item-field" style="grid-column:1/-1">
-          <label>Item Notes</label>
-          <input type="text" value="${it.notes}" onchange="setField(${it.id},'notes',this.value)" />
+        <div class="field price-field">
+          <label>Price / Kg <span class="req">*</span>${item.priceAutoFilled?'<span class="price-auto-tag">auto</span>':''}</label>
+          <input type="number" min="0" value="${item.pricePerKg || ''}" placeholder="Auto / manual" onchange="setItem('${item.id}','pricePerKg',this.value)" />
+        </div>
+        <div class="field">
+          <label>Notes</label>
+          <input value="${escapeAttr(item.notes)}" placeholder="Optional" onchange="setItem('${item.id}','notes',this.value)" />
         </div>
       </div>
     </div>
   `).join('');
-  document.getElementById('summary').classList.toggle('visible', items.length > 0);
-  calcSummary();
 }
 
-function calcSummary() {
-  let bags = 0, grams = 0;
-  items.forEach(it => {
-    const q = parseInt(it.qty)||0;
-    bags  += q;
-    grams += q*(it.bagSize==='250g'?250:it.bagSize==='500g'?500:it.bagSize==='1kg'?1000:0);
+function toggleUrgent(){
+  state.urgent = !state.urgent;
+  $('urgentBtn').classList.toggle('active', state.urgent);
+  $('urgentCheck').textContent = state.urgent ? '✓' : '';
+}
+
+// ──────────────────────────────────────────────────────────
+// TOTALS / PREVIEW
+// ──────────────────────────────────────────────────────────
+function totals(){
+  let bags = 0, kg = 0, amount = 0;
+  state.items.forEach(item => {
+    const qty = Number(item.qty) || 0;
+    const itemKg = bagKg(item.bagSize) * qty;
+    const price = Number(item.pricePerKg) || 0;
+    bags += qty;
+    kg += itemKg;
+    amount += itemKg * price;
   });
-  document.getElementById('sumLines').textContent = items.length;
-  document.getElementById('sumBags').textContent  = bags;
-  document.getElementById('sumKg').textContent    = (grams/1000).toFixed(1);
+  return { lines:state.items.length, bags, kg, amount };
+}
+function updatePreview(){
+  if(state.orderNo) state.orderId = makeOrderId();
+  $('orderId').textContent = state.orderId;
+  $('summaryOrderId').textContent = state.orderId;
+  $('summarySource').textContent = sourceFull();
+  const t = totals();
+  $('sumLines').textContent = t.lines;
+  $('sumBags').textContent = t.bags;
+  $('sumKg').textContent = t.kg.toFixed(2);
+  $('sumAmount').textContent = 'Rs ' + formatINR(t.amount);
+  updateCreditBox();
 }
 
-// ── Toast ──
-function toast(msg, type='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = `toast ${type} show`;
-  setTimeout(()=>t.classList.remove('show'), 4000);
+function updateCreditBox(){
+  const t = totals();
+  if(state.source !== 'B'){
+    $('creditStatus').textContent = 'B2B credit appears here after selecting a café.';
+    $('creditStatus').className = 'credit-status';
+    ['creditLimit','creditOutstanding','creditRemaining','creditAfter'].forEach(id => $(id).textContent = '—');
+    return;
+  }
+  const c = state.credit;
+  if(!c){
+    $('creditStatus').textContent = 'No credit record loaded. Select a café and click "Refresh Credit".';
+    $('creditStatus').className = 'credit-status yellow';
+    ['creditLimit','creditOutstanding','creditRemaining','creditAfter'].forEach(id => $(id).textContent = '—');
+    return;
+  }
+  const afterOutstanding = Number(c.outstanding || 0) + t.amount;
+  const remainingAfter = Number(c.limit || 0) - afterOutstanding;
+  const status = creditStatus(afterOutstanding, Number(c.limit || 75000));
+  $('creditLimit').textContent = 'Rs ' + formatINR(c.limit);
+  $('creditOutstanding').textContent = 'Rs ' + formatINR(c.outstanding);
+  $('creditRemaining').textContent = 'Rs ' + formatINR(c.remaining);
+  $('creditAfter').textContent = 'Rs ' + formatINR(remainingAfter);
+  $('creditStatus').textContent = `${status.emoji} ${status.label} after this order · outstanding Rs ${formatINR(afterOutstanding)}`;
+  $('creditStatus').className = 'credit-status ' + status.className;
 }
 
-// ── Validate ──
-function validate() {
-  if (!selectedSource)                                      { toast('Select an order source (S / W / B)','err'); return false; }
-  if (!document.getElementById('customerName').value.trim()){ toast('Customer name required','err'); return false; }
-  if (!document.getElementById('dispatchDate').value)       { toast('Dispatch date required','err'); return false; }
-  if (!items.length)                                        { toast('Add at least one item','err'); return false; }
-  for (let i=0;i<items.length;i++) {
-    const it=items[i];
-    if (!it.product)              { toast(`Item ${i+1}: select a product`,'err'); return false; }
-    if (!it.bagSize)              { toast(`Item ${i+1}: select bag size`,'err'); return false; }
-    if (!it.qty||parseInt(it.qty)<1) { toast(`Item ${i+1}: select quantity`,'err'); return false; }
+function creditStatus(outstanding, limit){
+  if(outstanding > limit) return { label:'RED — credit exceeded', emoji:'🔴', className:'red' };
+  if(outstanding > limit * 2 / 3) return { label:'YELLOW — approaching limit', emoji:'🟡', className:'yellow' };
+  return { label:'GREEN — healthy', emoji:'🟢', className:'green' };
+}
+
+// ──────────────────────────────────────────────────────────
+// VALIDATION & SUBMIT
+// ──────────────────────────────────────────────────────────
+function validate(){
+  if(!state.webAppUrl && !$('webAppUrl').value.trim()){ toast('Paste Web App URL first.', 'err'); return false; }
+  if(!state.source){ toast('Select source: S, W, or B.', 'err'); return false; }
+  const name = $('customerName').value.trim();
+  if(!name){ toast(state.source === 'B' ? 'Select or enter café name.' : 'Customer name required.', 'err'); return false; }
+  if(state.source === 'B' && !currentCafeName()){ toast('B2B café name required.', 'err'); return false; }
+  if(!$('dispatchDate').value){ toast('Dispatch date required.', 'err'); return false; }
+  if(!state.items.length){ toast('Add at least one item.', 'err'); return false; }
+  for(let i=0;i<state.items.length;i++){
+    const item = state.items[i];
+    if(!item.product){ toast(`Item ${i+1}: product required.`, 'err'); return false; }
+    if(!item.bagSize){ toast(`Item ${i+1}: bag size required.`, 'err'); return false; }
+    if(!Number(item.qty)){ toast(`Item ${i+1}: quantity required.`, 'err'); return false; }
+    if(state.source === 'B' && !Number(item.pricePerKg)){ toast(`Item ${i+1}: B2B price/kg required.`, 'err'); return false; }
   }
   return true;
 }
 
-// ── Submit ──
-async function submitOrder() {
-  if (!validate()) return;
-  // Send to all connected scripts in parallel
-  const urls = SCRIPT_URLS;
-
-  const btn = document.getElementById('submitBtn');
-  const lbl = document.getElementById('submitLabel');
-  btn.disabled = true;
-  lbl.innerHTML = '<div class="spin"></div> Submitting…';
-
-  const orderId = document.getElementById('orderId').textContent;
-  const payload = {
-    orderId:      orderId==='—' ? `X-000-000` : orderId,
-    source:       selectedSource,
-    sourceFull:   selectedSource === 'S' ? 'S — Shopify B2C' :
-                  selectedSource === 'W' ? 'W — WhatsApp / Phone B2C' :
-                  selectedSource === 'B' ? 'B — B2B Wholesale' : '—',
-    customerName: document.getElementById('customerName').value.trim(),
-    city:         document.getElementById('cityInput').value.trim(),
-    phone:        document.getElementById('phone').value.trim(),
-    dispatchDate: document.getElementById('dispatchDate').value,
-    urgent:       isUrgent,
-    submittedAt:  new Date().toISOString(),
-    items: items.map(it=>({
-      product: it.product,
-      bagSize: it.bagSize,
-      qty:     parseInt(it.qty),
-      grind:   it.grind || 'Whole Bean',
-      notes:   it.notes
+function buildPayload(){
+  const isB2B = state.source === 'B';
+  const cafeName = isB2B ? currentCafeName() : '';
+  return {
+    orderId: state.orderId,
+    source: state.source,
+    sourceFull: sourceFull(),
+    customerName: isB2B ? cafeName : $('customerName').value.trim(),
+    cafeName: cafeName,
+    city: $('city').value.trim(),
+    phone: $('phone').value.trim(),
+    dispatchDate: $('dispatchDate').value,
+    urgent: state.urgent,
+    submittedAt: new Date().toISOString(),
+    items: state.items.map(item => ({
+      product: item.product,
+      bagSize: item.bagSize,
+      qty: Number(item.qty),
+      grind: item.grind || 'Whole Bean',
+      notes: item.notes || '',
+      pricePerKg: Number(item.pricePerKg) || 0
     }))
   };
+}
 
-  try {
-    await Promise.all(urls.map(u => fetch(u, {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+async function submitOrder(){
+  if(!validate()) return;
+  const btn = $('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Submitting';
+  try{
+    saveUrl();
+    await ensureOrderId();
+    const payload = buildPayload();
+    diag('Submitting order ' + payload.orderId);
+    await fetch(getUrl(), {
+      method:'POST',
+      mode:'no-cors',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
-    })));
-    toast(`Order ${payload.orderId} submitted`, 'ok');
-    setTimeout(resetForm, 1500);
-  } catch(err) {
-    toast('Submission failed','err');
-  } finally {
+    });
+    toast(`Order ${payload.orderId} submitted. PDF will print shortly.`, 'ok');
+    diag('Order submitted: ' + payload.orderId, 'ok');
+    setTimeout(resetForm, 1100);
+  }catch(err){
+    toast('Submission failed: ' + err.message, 'err');
+    diag('Submit error: ' + err.message, 'err');
+  }finally{
     btn.disabled = false;
-    lbl.textContent = 'Generate Order Slip';
+    btn.textContent = 'Generate Order Slip';
   }
 }
 
-function resetForm() {
-  ['customerName','cityInput','phone','dispatchDate'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('orderId').textContent = '—';
-  selectedSource = '';
-  ['S','W','B'].forEach(c=>document.getElementById('src-'+c).classList.remove('selected'));
-  isUrgent = false;
-  document.getElementById('urgentRow').classList.remove('on');
-  document.getElementById('urgBox').textContent = '';
-  document.getElementById('urgLabel').textContent = 'Mark as Urgent';
-  currentOrderNum = null;
-  items = []; render();
+function resetForm(){
+  state.source = '';
+  state.orderNo = null;
+  state.orderId = '—';
+  state.selectedCafe = null;
+  state.credit = null;
+  state.cafePricing = {};
+  state.urgent = false;
+  state.items = [];
+  ['S','W','B'].forEach(c => $('source'+c).classList.remove('active'));
+  $('b2bPanel').classList.remove('visible');
+  $('formCard').classList.remove('is-b2b');
+  ['customerName','city','phone','manualCafeName'].forEach(id => $(id).value='');
+  $('cafeSelect').value = '';
+  $('dispatchDate').value = '';
+  $('urgentBtn').classList.remove('active');
+  $('urgentCheck').textContent = '';
+  $('addCafePanel').classList.remove('visible');
+  addItem();
+  updatePreview();
 }
 
-// ── Init ──
-document.getElementById('dispatchDate').min = new Date().toISOString().split('T')[0];
-render();
+// ──────────────────────────────────────────────────────────
+// UTILITIES
+// ──────────────────────────────────────────────────────────
+function bagKg(size){
+  if(size === '250g') return .25;
+  if(size === '500g') return .5;
+  if(size === '1kg') return 1;
+  const num = parseFloat(String(size).replace(/[^0-9.]/g,'')) || 0;
+  return String(size).toLowerCase().includes('kg') ? num : num/1000;
+}
+function formatINR(n){ return Math.round(Number(n)||0).toLocaleString('en-IN'); }
+function formatDateTime(d){ return new Intl.DateTimeFormat('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(d); }
+function toast(msg,type=''){
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'), 4200);
+}
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+function escapeAttr(s){ return escapeHtml(s).replace(/`/g,'&#096;'); }
+
+// Keyboard shortcut: Cmd/Ctrl+Enter submits
+document.addEventListener('keydown', e => {
+  if((e.metaKey || e.ctrlKey) && e.key === 'Enter'){
+    e.preventDefault();
+    submitOrder();
+  }
+});
 </script>
 </body>
 </html>
