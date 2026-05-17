@@ -51,6 +51,19 @@
     padding-bottom:20px;
     margin-bottom:22px;
   }
+  .brand-lockup{
+    display:flex;
+    align-items:center;
+    gap:18px;
+  }
+  .brand-logo{
+    width:78px;
+    height:78px;
+    object-fit:contain;
+    flex:0 0 auto;
+    display:block;
+  }
+  .brand-logo.is-hidden{display:none}
   .brand h1{
     font-family:var(--serif);
     font-size:clamp(40px,7vw,72px);
@@ -291,7 +304,9 @@
     body{padding:16px 10px 105px}
     .shell{max-width:100%}
     .topbar{gap:12px;margin-bottom:18px;padding-bottom:18px}
-    .brand h1{font-size:42px;line-height:.86}
+    .brand-lockup{gap:10px}
+    .brand-logo{width:52px;height:52px}
+    .brand h1{font-size:38px;line-height:.86}
     .brand p{font-size:9px;letter-spacing:.22em}
     .status-pill{min-width:0;padding:10px 12px}
     .card-pad{padding:14px}
@@ -332,7 +347,12 @@
 <div class="shell">
   <header class="topbar">
     <div class="brand">
-      <h1>Ikkis Coffee Roasters</h1>
+      <div class="brand-lockup">
+        <!-- Put your logo file next to this HTML as: ikkis-logo.png
+             Or replace src with a hosted logo URL. If missing, the text logo still works. -->
+        <img class="brand-logo" src="ikkis-logo.png" alt="IKKIS Coffee Roasters logo" onerror="this.classList.add('is-hidden')" />
+        <h1>Ikkis Coffee Roasters</h1>
+      </div>
       <p>KOT v2 · Order Entry System</p>
     </div>
     <div class="status-pill" id="connectionStatus"><strong>Connected</strong>IKKIS KOT v2 ready</div>
@@ -514,10 +534,13 @@ async function submitNewCafe(){ const name=$('newCafeName').value.trim(); if(!na
 
 function addItem(){ state.items.push({id:Date.now()+Math.random(), product:'', bagSize:'250g', qty:1, grind:'Whole Bean', notes:'', pricePerKg:'', priceAutoFilled:false}); renderItems(); updatePreview(); }
 function removeItem(id){ state.items=state.items.filter(i=>String(i.id)!==String(id)); renderItems(); updatePreview(); }
-function setItem(id,key,value){ const item=state.items.find(i=>String(i.id)===String(id)); if(!item) return; item[key]=value; if(key==='product'&&state.source==='B'){ const pricing=state.cafePricing[value]; if(pricing&&pricing.price){ item.pricePerKg=pricing.price; item.priceAutoFilled=true; } else item.priceAutoFilled=false; } if(key==='pricePerKg') item.priceAutoFilled=false; renderItems(); updatePreview(); }
-function autoFillItemPrices(){ state.items.forEach(item=>{ const pricing=state.cafePricing[item.product]; if(pricing&&pricing.price){ item.pricePerKg=pricing.price; item.priceAutoFilled=true; } }); }
+function setItem(id,key,value){ const item=state.items.find(i=>String(i.id)===String(id)); if(!item) return; item[key]=value; if(key==='product'&&state.source==='B'){ const price=lookupCafePrice(value); if(price){ item.pricePerKg=price; item.priceAutoFilled=true; } else { item.pricePerKg=''; item.priceAutoFilled=false; toast('No saved rate found for '+value+' at this café. Enter Rate/Kg manually.','warn'); } } if(key==='pricePerKg') item.priceAutoFilled=false; renderItems(); updatePreview(); }
+function autoFillItemPrices(){ state.items.forEach(item=>{ const price=lookupCafePrice(item.product); if(price){ item.pricePerKg=price; item.priceAutoFilled=true; } }); }
+function lookupCafePrice(product){ if(!product || !state.cafePricing) return 0; if(state.cafePricing[product] && Number(state.cafePricing[product].price)) return Number(state.cafePricing[product].price); const wanted=normalizeKey(product); const matchKey=Object.keys(state.cafePricing).find(k=>normalizeKey(k)===wanted); if(matchKey && Number(state.cafePricing[matchKey].price)) return Number(state.cafePricing[matchKey].price); return 0; }
+function normalizeKey(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
+function pricePlaceholder(item){ if(state.source!=='B') return ''; if(!currentCafeName()) return 'Select café first'; if(!item.product) return 'Select product first'; if(lookupCafePrice(item.product)) return 'Auto from café pricing'; return 'No saved rate — enter manually'; }
 function productOptions(selected){ const fromPricing=Object.keys(state.cafePricing||{}); const products=Array.from(new Set([...fromPricing,...DEFAULT_PRODUCTS])); return '<option value="">Select product…</option>'+products.map(p=>`<option value="${escapeHtml(p)}" ${p===selected?'selected':''}>${escapeHtml(p)}</option>`).join(''); }
-function renderItems(){ $('items').innerHTML=state.items.map((item,index)=>`<div class="item"><div class="item-head"><div class="item-title">Item ${index+1}</div><button class="remove" onclick="removeItem('${item.id}')" type="button">Remove</button></div><div class="item-grid"><div class="field"><label>Product <span class="req">*</span></label><select onchange="setItem('${item.id}','product',this.value)">${productOptions(item.product)}</select></div><div class="field"><label>Bag Size <span class="req">*</span></label><select onchange="setItem('${item.id}','bagSize',this.value)">${BAG_SIZES.map(b=>`<option value="${b}" ${b===item.bagSize?'selected':''}>${b}</option>`).join('')}</select></div><div class="field"><label>Qty <span class="req">*</span></label><input type="number" min="1" value="${item.qty}" onchange="setItem('${item.id}','qty',this.value)" /></div></div><div class="item-grid-3"><div class="field"><label>Grind</label><select onchange="setItem('${item.id}','grind',this.value)">${GRINDS.map(g=>`<option value="${g}" ${g===item.grind?'selected':''}>${g}</option>`).join('')}</select></div><div class="field price-field"><label>Rate / Kg <span class="req">*</span>${item.priceAutoFilled?'<span class="price-auto-tag">auto</span>':''}</label><input type="number" min="0" value="${item.pricePerKg||''}" placeholder="Auto from café pricing" onchange="setItem('${item.id}','pricePerKg',this.value)" /><div class="hint">Used only for B2B credit amount.</div></div><div class="field"><label>Notes</label><input value="${escapeAttr(item.notes)}" placeholder="Optional" onchange="setItem('${item.id}','notes',this.value)" /></div></div></div>`).join(''); }
+function renderItems(){ $('items').innerHTML=state.items.map((item,index)=>`<div class="item"><div class="item-head"><div class="item-title">Item ${index+1}</div><button class="remove" onclick="removeItem('${item.id}')" type="button">Remove</button></div><div class="item-grid"><div class="field"><label>Product <span class="req">*</span></label><select onchange="setItem('${item.id}','product',this.value)">${productOptions(item.product)}</select></div><div class="field"><label>Bag Size <span class="req">*</span></label><select onchange="setItem('${item.id}','bagSize',this.value)">${BAG_SIZES.map(b=>`<option value="${b}" ${b===item.bagSize?'selected':''}>${b}</option>`).join('')}</select></div><div class="field"><label>Qty <span class="req">*</span></label><input type="number" min="1" value="${item.qty}" onchange="setItem('${item.id}','qty',this.value)" /></div></div><div class="item-grid-3"><div class="field"><label>Grind</label><select onchange="setItem('${item.id}','grind',this.value)">${GRINDS.map(g=>`<option value="${g}" ${g===item.grind?'selected':''}>${g}</option>`).join('')}</select></div><div class="field price-field"><label>Rate / Kg <span class="req">*</span>${item.priceAutoFilled?'<span class="price-auto-tag">auto</span>':''}</label><input type="number" min="0" value="${item.pricePerKg||''}" placeholder="${pricePlaceholder(item)}" onchange="setItem('${item.id}','pricePerKg',this.value)" /><div class="hint">Used only for B2B credit amount.</div></div><div class="field"><label>Notes</label><input value="${escapeAttr(item.notes)}" placeholder="Optional" onchange="setItem('${item.id}','notes',this.value)" /></div></div></div>`).join(''); }
 
 function showCitySuggestions(input, boxId){ const box=$(boxId); const q=input.value.trim().toLowerCase(); if(!q){ box.classList.remove('open'); return; } const matches=INDIAN_CITIES.filter(c=>c.toLowerCase().startsWith(q)).slice(0,8); if(!matches.length){ box.classList.remove('open'); return; } box.innerHTML=matches.map(c=>`<div class="suggestion-item" onmousedown="selectCity('${boxId}','${escapeAttr(c)}')">${escapeHtml(c)}</div>`).join(''); box.classList.add('open'); }
 function selectCity(boxId, city){ const input = boxId==='citySuggest' ? $('city') : $('newCafeCity'); input.value=city; $(boxId).classList.remove('open'); updatePreview(); }
