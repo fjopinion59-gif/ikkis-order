@@ -508,6 +508,45 @@
             <button class="mini-btn" id="loadCafesBtn" onclick="loadCafes(true)" type="button">Load Cafés</button>
             <button class="mini-btn" id="addCafeToggleBtn" onclick="toggleAddCafe()" type="button">+ Add Café</button>
             <button class="mini-btn" id="refreshCreditBtn" onclick="loadCredit(true)" type="button">Refresh Credit</button>
+            <button class="mini-btn primary" id="paymentToggleBtn" onclick="togglePaymentPanel()" type="button">Record Payment</button>
+          </div>
+
+          <div class="add-cafe" id="paymentPanel">
+            <div class="add-cafe-title">Record Café Payment</div>
+            <div class="hint" style="margin-bottom:14px">Use this only when money is received from a café. It updates accounts/credit and does not create a KOT.</div>
+
+            <div class="row-3">
+              <div class="field">
+                <label>Amount Received <span class="req">*</span></label>
+                <input id="paymentAmount" type="number" min="1" placeholder="e.g. 25000" />
+              </div>
+
+              <div class="field">
+                <label>Mode</label>
+                <select id="paymentMode">
+                  <option>UPI</option>
+                  <option>Bank Transfer</option>
+                  <option>Cash</option>
+                  <option>Cheque</option>
+                  <option>Other</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Reference</label>
+                <input id="paymentReference" placeholder="UTR / cheque no. / internal ref" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Payment Notes</label>
+              <input id="paymentNotes" placeholder="Optional accounts note" />
+            </div>
+
+            <div class="row-actions">
+              <button class="mini-btn primary" id="savePaymentBtn" onclick="submitCafePayment()" type="button">Save Payment</button>
+              <button class="mini-btn" onclick="togglePaymentPanel()" type="button">Cancel</button>
+            </div>
           </div>
 
           <div class="add-cafe" id="addCafePanel">
@@ -640,10 +679,76 @@ function onManualCafeInput(){ const name=$('manualCafeName').value.trim(); if(na
 function currentCafeName(){ return state.source==='B' ? ($('cafeSelect').value || $('manualCafeName').value.trim() || $('customerName').value.trim()) : ''; }
 async function loadCafePricing(name){ try{ const data=await apiGet('getPricing',{cafe:name}); state.cafePricing=data.pricing||{}; autoFillItemPrices(); renderItems(); }catch(e){ state.cafePricing={}; } }
 async function loadCredit(showToast=true){ const name=currentCafeName(); if(!name) return showToast&&toast('Select a café first.','warn'); try{ const data=await apiGet('getCredit',{cafe:name}); state.credit=data; updateCreditBox(); if(showToast) toast('Credit refreshed.','ok'); }catch(err){ state.credit=null; updateCreditBox(); if(showToast) toast('Credit not found.','warn'); } }
-function toggleAddCafe(){ const panel=$('addCafePanel'); panel.classList.toggle('visible'); if(panel.classList.contains('visible')){ const manual=$('manualCafeName').value.trim(); if(manual&&!$('newCafeName').value) $('newCafeName').value=manual; } }
+function toggleAddCafe(){ const panel=$('addCafePanel'); const paymentPanel=$('paymentPanel'); if(paymentPanel) paymentPanel.classList.remove('visible'); panel.classList.toggle('visible'); if(panel.classList.contains('visible')){ const manual=$('manualCafeName').value.trim(); if(manual&&!$('newCafeName').value) $('newCafeName').value=manual; } }
 async function submitNewCafe(){ const name=$('newCafeName').value.trim(); if(!name) return toast('New café name required.','err'); try{ const data=await apiGet('addCafe',{name, gstEntity:$('newGstEntity').value.trim(), city:$('newCafeCity').value.trim(), phone:$('newCafePhone').value.trim(), creditLimit:$('newCreditLimit').value||75000, openingBalance:$('newOpeningBalance').value||0, hasGst:$('newHasGst').value, gstState:$('newGstState').value.trim(), shipping:'Yes'}); toast(`Café "${name}" created.`,'ok'); $('addCafePanel').classList.remove('visible'); await loadCafes(false); $('cafeSelect').value=name; await onCafeSelected(); }catch(err){ toast('Could not create café: '+err.message,'err'); } }
 
-function addItem(){ state.items.push({id:Date.now()+Math.random(), product:'', bagSize:'250g', qty:1, grind:'Whole Bean', notes:'', pricePerKg:'', priceAutoFilled:false}); renderItems(); updatePreview(); }
+function togglePaymentPanel() {
+  const panel = $('paymentPanel');
+
+  if (!currentCafeName()) {
+    return toast('Select a café first.', 'warn');
+  }
+
+  // Close add-café panel if open, so staff does not mix account creation and payment entry.
+  const addPanel = $('addCafePanel');
+  if (addPanel) addPanel.classList.remove('visible');
+
+  panel.classList.toggle('visible');
+
+  if (panel.classList.contains('visible')) {
+    setTimeout(() => {
+      const amountField = $('paymentAmount');
+      if (amountField) amountField.focus();
+    }, 80);
+  }
+}
+
+async function submitCafePayment() {
+  const cafe = currentCafeName();
+  const amount = Number($('paymentAmount').value || 0);
+  const mode = $('paymentMode').value;
+  const reference = $('paymentReference').value.trim();
+  const notes = $('paymentNotes').value.trim();
+  const btn = $('savePaymentBtn');
+
+  if (!cafe) return toast('Select a café first.', 'err');
+  if (!amount || amount <= 0) return toast('Enter payment amount.', 'err');
+
+  try {
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Saving';
+    }
+
+    const data = await apiGet('recordPayment', {
+      cafe,
+      amount,
+      mode,
+      reference,
+      notes
+    });
+
+    if (data.error) throw new Error(data.error);
+
+    toast(`Payment saved: Rs ${formatINR(amount)} from ${cafe}`, 'ok');
+
+    $('paymentAmount').value = '';
+    $('paymentReference').value = '';
+    $('paymentNotes').value = '';
+    $('paymentPanel').classList.remove('visible');
+
+    await loadCredit(true);
+  } catch (err) {
+    toast('Payment not saved: ' + err.message, 'err');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Save Payment';
+    }
+  }
+}
+
+function addItem(){ state.items.push({id:Date.now()+Math.random(), product:'', bagSize:'250g', qty:1, grind:'Whole Beans', notes:'', pricePerKg:'', priceAutoFilled:false}); renderItems(); updatePreview(); }
 function removeItem(id){ state.items=state.items.filter(i=>String(i.id)!==String(id)); renderItems(); updatePreview(); }
 function setItem(id,key,value){ const item=state.items.find(i=>String(i.id)===String(id)); if(!item) return; item[key]=value; if(key==='product'&&state.source==='B'){ const price=lookupCafePrice(value); if(price){ item.pricePerKg=price; item.priceAutoFilled=true; } else { item.pricePerKg=''; item.priceAutoFilled=false; toast('No saved rate found for '+value+' at this café. Enter Rate/Kg manually.','warn'); } } if(key==='pricePerKg') item.priceAutoFilled=false; renderItems(); updatePreview(); }
 function autoFillItemPrices(){ state.items.forEach(item=>{ const price=lookupCafePrice(item.product); if(price){ item.pricePerKg=price; item.priceAutoFilled=true; } }); }
@@ -664,9 +769,9 @@ function updateCreditBox(){ const t=totals(); if(state.source!=='B'){ $('creditS
 function creditStatus(outstanding,limit){ if(outstanding>limit) return {label:'RED — credit exceeded',emoji:'🔴',className:'red'}; if(outstanding>limit*2/3) return {label:'YELLOW — approaching limit',emoji:'🟡',className:'yellow'}; return {label:'GREEN — healthy',emoji:'🟢',className:'green'}; }
 
 function validate(){ if(!state.source) return toast('Select source: S, W, or B.','err'),false; const name=$('customerName').value.trim(); if(!name) return toast(state.source==='B'?'Select or enter café name.':'Customer name required.','err'),false; if(state.source==='B'&&!currentCafeName()) return toast('B2B café name required.','err'),false; if(!$('dispatchDate').value) return toast('Dispatch date required.','err'),false; if(!state.items.length) return toast('Add at least one item.','err'),false; for(let i=0;i<state.items.length;i++){ const item=state.items[i]; if(!item.product) return toast(`Item ${i+1}: product required.`,'err'),false; if(!item.bagSize) return toast(`Item ${i+1}: bag size required.`,'err'),false; if(!Number(item.qty)) return toast(`Item ${i+1}: quantity required.`,'err'),false; if(state.source==='B'&&!Number(item.pricePerKg)) return toast(`Item ${i+1}: B2B rate/kg required.`,'err'),false; } return true; }
-function buildPayload(){ const isB2B=state.source==='B'; const cafeName=isB2B?currentCafeName():''; return {orderId:state.orderId, source:state.source, sourceFull:sourceFull(), customerName:isB2B?cafeName:$('customerName').value.trim(), cafeName, city:$('city').value.trim(), phone:$('phone').value.trim(), dispatchDate:$('dispatchDate').value, urgent:state.urgent, submittedAt:new Date().toISOString(), items:state.items.map(item=>({product:item.product, bagSize:item.bagSize, qty:Number(item.qty), grind:item.grind||'Whole Bean', notes:item.notes||'', pricePerKg:Number(item.pricePerKg)||0}))}; }
+function buildPayload(){ const isB2B=state.source==='B'; const cafeName=isB2B?currentCafeName():''; return {orderId:state.orderId, source:state.source, sourceFull:sourceFull(), customerName:isB2B?cafeName:$('customerName').value.trim(), cafeName, city:$('city').value.trim(), phone:$('phone').value.trim(), dispatchDate:$('dispatchDate').value, urgent:state.urgent, submittedAt:new Date().toISOString(), items:state.items.map(item=>({product:item.product, bagSize:item.bagSize, qty:Number(item.qty), grind:item.grind||'Whole Beans', notes:item.notes||'', pricePerKg:Number(item.pricePerKg)||0}))}; }
 async function submitOrder(){ if(!validate()) return; const btn=$('submitBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Submitting'; try{ await ensureOrderId(); const payload=buildPayload(); await fetch(getUrl(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}); toast(`Order ${payload.orderId} submitted. PDF will print shortly.`,'ok'); setTimeout(resetForm,1100); }catch(err){ toast('Submission failed: '+err.message,'err'); } finally{ btn.disabled=false; btn.textContent='Generate Order Slip'; } }
-function resetForm(){ state.source=''; state.orderNo=null; state.orderId='—'; state.selectedCafe=null; state.credit=null; state.cafePricing={}; state.urgent=false; state.items=[]; ['S','W','B'].forEach(c=>$('source'+c).classList.remove('active')); $('b2bPanel').classList.remove('visible'); $('formCard').classList.remove('is-b2b'); ['customerName','city','phone','manualCafeName'].forEach(id=>$(id).value=''); $('cafeSelect').value=''; $('dispatchDate').value=''; $('urgentBtn').classList.remove('active'); $('urgentCheck').textContent=''; $('addCafePanel').classList.remove('visible'); addItem(); updatePreview(); }
+function resetForm(){ state.source=''; state.orderNo=null; state.orderId='—'; state.selectedCafe=null; state.credit=null; state.cafePricing={}; state.urgent=false; state.items=[]; ['S','W','B'].forEach(c=>$('source'+c).classList.remove('active')); $('b2bPanel').classList.remove('visible'); $('formCard').classList.remove('is-b2b'); ['customerName','city','phone','manualCafeName'].forEach(id=>$(id).value=''); $('cafeSelect').value=''; $('dispatchDate').value=''; $('urgentBtn').classList.remove('active'); $('urgentCheck').textContent=''; $('addCafePanel').classList.remove('visible'); if($('paymentPanel')) $('paymentPanel').classList.remove('visible'); ['paymentAmount','paymentReference','paymentNotes'].forEach(id=>{ if($(id)) $(id).value=''; }); addItem(); updatePreview(); }
 
 function bagKg(size){ if(size==='250g') return .25; if(size==='500g') return .5; if(size==='1kg') return 1; const num=parseFloat(String(size).replace(/[^0-9.]/g,''))||0; return String(size).toLowerCase().includes('kg')?num:num/1000; }
 function formatINR(n){ return Math.round(Number(n)||0).toLocaleString('en-IN'); }
