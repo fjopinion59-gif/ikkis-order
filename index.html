@@ -244,6 +244,30 @@
   .checkbox{width:18px;height:18px;border:1.5px solid var(--line-dark);display:grid;place-items:center;color:#fff}
   .urgent.active{color:var(--copper)}
   .urgent.active .checkbox{background:var(--copper);border-color:var(--copper)}
+  .shipping-row{
+    margin-top:14px;
+    padding:14px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.36);
+  }
+  .shipping-row .field{margin-bottom:0}
+  .shipping-toggle{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.17em;
+    text-transform:uppercase;
+    cursor:pointer;
+    padding:8px 0;
+  }
+  .shipping-toggle.active{color:var(--copper)}
+  .shipping-toggle.active .checkbox{background:var(--copper);border-color:var(--copper)}
+  .shipping-field input:disabled{opacity:.55;cursor:not-allowed}
 
   .items{display:flex;flex-direction:column;gap:12px}
   .item{border:1px solid var(--line);background:rgba(255,255,255,.36);padding:18px}
@@ -391,6 +415,10 @@
       padding:12px;
       margin-top:12px;
     }
+    .shipping-row{
+      padding:12px;
+      margin-top:10px;
+    }
     .add-cafe{
       margin-left:-12px;
       margin-right:-12px;
@@ -511,6 +539,18 @@
             <button class="mini-btn primary" id="paymentToggleBtn" onclick="togglePaymentPanel()" type="button">Record Payment</button>
           </div>
 
+          <div class="row shipping-row">
+            <div class="field">
+              <label>Shipping</label>
+              <button class="shipping-toggle" id="shippingToggle" onclick="toggleShipping()" type="button"><span class="checkbox" id="shippingCheck"></span> Add Shipping</button>
+            </div>
+            <div class="field shipping-field">
+              <label>Shipping Charge ₹</label>
+              <input id="shippingCharge" type="number" min="0" step="1" value="0" placeholder="0" disabled oninput="updateShippingCharge()" onchange="updateShippingCharge()" />
+              <div class="hint">Added to B2B amount and café credit only when shipping is checked.</div>
+            </div>
+          </div>
+
           <div class="add-cafe" id="paymentPanel">
             <div class="add-cafe-title">Record Café Payment</div>
             <div class="hint" style="margin-bottom:14px">Use this only when money is received from a café. It updates accounts/credit and does not create a KOT.</div>
@@ -617,7 +657,7 @@
           <div class="sum-box"><div class="v" id="sumLines">0</div><div class="k">Lines</div></div>
           <div class="sum-box"><div class="v" id="sumBags">0</div><div class="k">Bags</div></div>
           <div class="sum-box"><div class="v" id="sumKg">0.00</div><div class="k">Kg</div></div>
-          <div class="sum-box"><div class="v" id="sumAmount">Rs 0</div><div class="k">B2B Amount</div></div>
+          <div class="sum-box"><div class="v" id="sumAmount">Rs 0</div><div class="k">Final Amount</div></div>
         </div>
       </div>
       <button class="submit" id="submitBtn" onclick="submitOrder()">Generate Order Slip</button>
@@ -639,7 +679,7 @@ const BAG_SIZES = ['250g','500g','1kg'];
 const GRINDS = ['Whole Beans','Turkish','Espresso (3.5)','Mokka Pot (5)','Home Espresso (4.5)','Aeropress (6)','Pour Over (12)','Chemex','French Press (15)','Drip Machine','Cold Brew (16)','Custom'];
 const INDIAN_CITIES = ['Chandigarh','Chennai','Coimbatore','Chandrapur','Chhindwara','Churu','Chitrakoot','Delhi','New Delhi','Gurgaon','Gurugram','Noida','Faridabad','Ghaziabad','Mumbai','Navi Mumbai','Thane','Pune','Bengaluru','Bangalore','Hyderabad','Kolkata','Ahmedabad','Surat','Vadodara','Rajkot','Jaipur','Jodhpur','Udaipur','Kota','Ajmer','Amritsar','Jalandhar','Ludhiana','Patiala','Mohali','Panchkula','Zirakpur','Kharar','Derabassi','Bathinda','Pathankot','Jammu','Dehradun','Haridwar','Rishikesh','Lucknow','Kanpur','Agra','Varanasi','Prayagraj','Meerut','Bareilly','Bhopal','Indore','Jabalpur','Gwalior','Raipur','Nagpur','Nashik','Aurangabad','Goa','Panaji','Kochi','Kozhikode','Thiruvananthapuram','Mysuru','Mangalore','Madurai','Coimbatore','Tiruchirappalli','Vijayawada','Visakhapatnam','Bhubaneswar','Guwahati','Ranchi','Patna','Shimla','Solan'];
 
-const state = { webAppUrl: localStorage.getItem('IKKIS_KOT_V2_URL') || INTERNAL_WEB_APP_URL, source:'', orderNo:null, orderId:'—', cafes:JSON.parse(localStorage.getItem('IKKIS_KOT_V2_CAFES')||'[]'), selectedCafe:null, cafePricing:{}, credit:null, urgent:false, items:[] };
+const state = { webAppUrl: localStorage.getItem('IKKIS_KOT_V2_URL') || INTERNAL_WEB_APP_URL, source:'', orderNo:null, orderId:'—', cafes:JSON.parse(localStorage.getItem('IKKIS_KOT_V2_CAFES')||'[]'), selectedCafe:null, cafePricing:{}, credit:null, urgent:false, shippingEnabled:false, shippingCharge:0, items:[] };
 const $ = id => document.getElementById(id);
 
 function init(){
@@ -682,6 +722,8 @@ function selectSource(code){
       if(!item.bagSize || item.bagSize==='250g') item.bagSize='1kg';
     });
     renderItems();
+  } else {
+    resetShipping();
   }
 
   state.orderNo=null;
@@ -784,16 +826,20 @@ function showCitySuggestions(input, boxId){ const box=$(boxId); const q=input.va
 function selectCity(boxId, city){ const input = boxId==='citySuggest' ? $('city') : $('newCafeCity'); input.value=city; $(boxId).classList.remove('open'); updatePreview(); }
 function closeAllSuggestions(){ document.querySelectorAll('.suggestions').forEach(s=>s.classList.remove('open')); }
 function toggleUrgent(){ state.urgent=!state.urgent; $('urgentBtn').classList.toggle('active',state.urgent); $('urgentCheck').textContent=state.urgent?'✓':''; }
+function toggleShipping(){ state.shippingEnabled=!state.shippingEnabled; const input=$('shippingCharge'); $('shippingToggle').classList.toggle('active',state.shippingEnabled); $('shippingCheck').textContent=state.shippingEnabled?'✓':''; if(input){ input.disabled=!state.shippingEnabled; if(!state.shippingEnabled){ input.value='0'; state.shippingCharge=0; } else { input.value=input.value || '0'; setTimeout(()=>input.focus(),80); } } updatePreview(); }
+function updateShippingCharge(){ const input=$('shippingCharge'); state.shippingCharge=Math.max(0,Number((input&&input.value)||0)||0); updatePreview(); }
+function currentShippingCharge(){ if(state.source!=='B' || !state.shippingEnabled) return 0; return Math.max(0,Number((($('shippingCharge')||{}).value)||state.shippingCharge||0)||0); }
+function resetShipping(){ state.shippingEnabled=false; state.shippingCharge=0; const input=$('shippingCharge'); if(input){ input.value='0'; input.disabled=true; } const toggle=$('shippingToggle'); if(toggle) toggle.classList.remove('active'); const check=$('shippingCheck'); if(check) check.textContent=''; }
 
-function totals(){ let bags=0,kg=0,amount=0; state.items.forEach(item=>{ const qty=Number(item.qty)||0; const itemKg=bagKg(item.bagSize)*qty; const price=Number(item.pricePerKg)||0; bags+=qty; kg+=itemKg; amount+=itemKg*price; }); return {lines:state.items.length,bags,kg,amount}; }
+function totals(){ let bags=0,kg=0,coffeeAmount=0; state.items.forEach(item=>{ const qty=Number(item.qty)||0; const itemKg=bagKg(item.bagSize)*qty; const price=Number(item.pricePerKg)||0; bags+=qty; kg+=itemKg; coffeeAmount+=itemKg*price; }); const shippingCharge=currentShippingCharge(); return {lines:state.items.length,bags,kg,coffeeAmount,shippingCharge,amount:coffeeAmount+shippingCharge}; }
 function updatePreview(){ if(state.orderNo) state.orderId=makeOrderId(); $('orderId').textContent=state.orderId; $('summaryOrderId').textContent=state.orderId; $('summarySource').textContent=sourceFull(); const t=totals(); $('sumLines').textContent=t.lines; $('sumBags').textContent=t.bags; $('sumKg').textContent=t.kg.toFixed(2); $('sumAmount').textContent='Rs '+formatINR(t.amount); updateCreditBox(); }
-function updateCreditBox(){ const t=totals(); if(state.source!=='B'){ $('creditStatus').textContent='B2B credit appears here after selecting a café.'; $('creditStatus').className='credit-status'; ['creditLimit','creditOutstanding','creditRemaining','creditAfter'].forEach(id=>$(id).textContent='—'); return; } const c=state.credit; if(!c){ $('creditStatus').textContent='Select café and refresh credit.'; $('creditStatus').className='credit-status yellow'; ['creditLimit','creditOutstanding','creditRemaining','creditAfter'].forEach(id=>$(id).textContent='—'); return; } const afterOutstanding=Number(c.outstanding||0)+t.amount; const remainingAfter=Number(c.limit||0)-afterOutstanding; const status=creditStatus(afterOutstanding,Number(c.limit||75000)); $('creditLimit').textContent='Rs '+formatINR(c.limit); $('creditOutstanding').textContent='Rs '+formatINR(c.outstanding); $('creditRemaining').textContent='Rs '+formatINR(c.remaining); $('creditAfter').textContent='Rs '+formatINR(remainingAfter); $('creditStatus').textContent=`${status.emoji} ${status.label} after this order · outstanding Rs ${formatINR(afterOutstanding)}`; $('creditStatus').className='credit-status '+status.className; }
+function updateCreditBox(){ const t=totals(); if(state.source!=='B'){ $('creditStatus').textContent='B2B credit appears here after selecting a café.'; $('creditStatus').className='credit-status'; ['creditLimit','creditOutstanding','creditRemaining','creditAfter'].forEach(id=>$(id).textContent='—'); return; } const c=state.credit; if(!c){ $('creditStatus').textContent='Select café and refresh credit.'; $('creditStatus').className='credit-status yellow'; ['creditLimit','creditOutstanding','creditRemaining','creditAfter'].forEach(id=>$(id).textContent='—'); return; } const afterOutstanding=Number(c.outstanding||0)+t.amount; const remainingAfter=Number(c.limit||0)-afterOutstanding; const status=creditStatus(afterOutstanding,Number(c.limit||75000)); const shipText=t.shippingCharge?` · shipping Rs ${formatINR(t.shippingCharge)}`:''; $('creditLimit').textContent='Rs '+formatINR(c.limit); $('creditOutstanding').textContent='Rs '+formatINR(c.outstanding); $('creditRemaining').textContent='Rs '+formatINR(c.remaining); $('creditAfter').textContent='Rs '+formatINR(remainingAfter); $('creditStatus').textContent=`${status.emoji} ${status.label} after this order · outstanding Rs ${formatINR(afterOutstanding)}${shipText}`; $('creditStatus').className='credit-status '+status.className; }
 function creditStatus(outstanding,limit){ if(outstanding>limit) return {label:'RED — credit exceeded',emoji:'🔴',className:'red'}; if(outstanding>limit*2/3) return {label:'YELLOW — approaching limit',emoji:'🟡',className:'yellow'}; return {label:'GREEN — healthy',emoji:'🟢',className:'green'}; }
 
-function validate(){ if(!state.source) return toast('Select source: S, W, or B.','err'),false; const name=$('customerName').value.trim(); if(!name) return toast(state.source==='B'?'Select or enter café name.':'Customer name required.','err'),false; if(state.source==='B'&&!currentCafeName()) return toast('B2B café name required.','err'),false; if(!$('dispatchDate').value) return toast('Dispatch date required.','err'),false; if(!state.items.length) return toast('Add at least one item.','err'),false; for(let i=0;i<state.items.length;i++){ const item=state.items[i]; if(!item.product) return toast(`Item ${i+1}: product required.`,'err'),false; if(!item.bagSize) return toast(`Item ${i+1}: bag size required.`,'err'),false; if(!Number(item.qty)) return toast(`Item ${i+1}: quantity required.`,'err'),false; if(state.source==='B'&&!Number(item.pricePerKg)) return toast(`Item ${i+1}: B2B rate/kg required.`,'err'),false; } return true; }
-function buildPayload(){ const isB2B=state.source==='B'; const cafeName=isB2B?currentCafeName():''; return {orderId:state.orderId, source:state.source, sourceFull:sourceFull(), customerName:isB2B?cafeName:$('customerName').value.trim(), cafeName, city:$('city').value.trim(), phone:$('phone').value.trim(), dispatchDate:$('dispatchDate').value, urgent:state.urgent, submittedAt:new Date().toISOString(), items:state.items.map(item=>({product:item.product, bagSize:item.bagSize, qty:Number(item.qty), grind:item.grind||'Whole Beans', notes:item.notes||'', pricePerKg:Number(item.pricePerKg)||0}))}; }
+function validate(){ if(!state.source) return toast('Select source: S, W, or B.','err'),false; const name=$('customerName').value.trim(); if(!name) return toast(state.source==='B'?'Select or enter café name.':'Customer name required.','err'),false; if(state.source==='B'&&!currentCafeName()) return toast('B2B café name required.','err'),false; if(state.source==='B'&&state.shippingEnabled&&currentShippingCharge()<0) return toast('Shipping charge cannot be negative.','err'),false; if(!$('dispatchDate').value) return toast('Dispatch date required.','err'),false; if(!state.items.length) return toast('Add at least one item.','err'),false; for(let i=0;i<state.items.length;i++){ const item=state.items[i]; if(!item.product) return toast(`Item ${i+1}: product required.`,'err'),false; if(!item.bagSize) return toast(`Item ${i+1}: bag size required.`,'err'),false; if(!Number(item.qty)) return toast(`Item ${i+1}: quantity required.`,'err'),false; if(state.source==='B'&&!Number(item.pricePerKg)) return toast(`Item ${i+1}: B2B rate/kg required.`,'err'),false; } return true; }
+function buildPayload(){ const isB2B=state.source==='B'; const cafeName=isB2B?currentCafeName():''; const t=totals(); return {orderId:state.orderId, source:state.source, sourceFull:sourceFull(), customerName:isB2B?cafeName:$('customerName').value.trim(), cafeName, city:$('city').value.trim(), phone:$('phone').value.trim(), dispatchDate:$('dispatchDate').value, urgent:state.urgent, shippingApplied:isB2B&&state.shippingEnabled, shippingCharge:isB2B?t.shippingCharge:0, coffeeAmount:isB2B?t.coffeeAmount:0, b2bAmount:isB2B?t.amount:0, submittedAt:new Date().toISOString(), items:state.items.map(item=>({product:item.product, bagSize:item.bagSize, qty:Number(item.qty), grind:item.grind||'Whole Beans', notes:item.notes||'', pricePerKg:Number(item.pricePerKg)||0}))}; }
 async function submitOrder(){ if(!validate()) return; const btn=$('submitBtn'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Submitting'; try{ await ensureOrderId(); const payload=buildPayload(); await fetch(getUrl(),{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}); toast(`Order ${payload.orderId} submitted. PDF will print shortly.`,'ok'); setTimeout(resetForm,1100); }catch(err){ toast('Submission failed: '+err.message,'err'); } finally{ btn.disabled=false; btn.textContent='Generate Order Slip'; } }
-function resetForm(){ state.source=''; state.orderNo=null; state.orderId='—'; state.selectedCafe=null; state.credit=null; state.cafePricing={}; state.urgent=false; state.items=[]; ['S','W','B'].forEach(c=>$('source'+c).classList.remove('active')); $('b2bPanel').classList.remove('visible'); $('formCard').classList.remove('is-b2b'); ['customerName','city','phone','manualCafeName'].forEach(id=>$(id).value=''); $('cafeSelect').value=''; $('dispatchDate').value=''; $('urgentBtn').classList.remove('active'); $('urgentCheck').textContent=''; $('addCafePanel').classList.remove('visible'); if($('paymentPanel')) $('paymentPanel').classList.remove('visible'); ['paymentAmount','paymentReference','paymentNotes'].forEach(id=>{ if($(id)) $(id).value=''; }); addItem(); updatePreview(); }
+function resetForm(){ state.source=''; state.orderNo=null; state.orderId='—'; state.selectedCafe=null; state.credit=null; state.cafePricing={}; state.urgent=false; state.items=[]; ['S','W','B'].forEach(c=>$('source'+c).classList.remove('active')); $('b2bPanel').classList.remove('visible'); $('formCard').classList.remove('is-b2b'); ['customerName','city','phone','manualCafeName'].forEach(id=>$(id).value=''); $('cafeSelect').value=''; $('dispatchDate').value=''; $('urgentBtn').classList.remove('active'); $('urgentCheck').textContent=''; resetShipping(); $('addCafePanel').classList.remove('visible'); if($('paymentPanel')) $('paymentPanel').classList.remove('visible'); ['paymentAmount','paymentReference','paymentNotes'].forEach(id=>{ if($(id)) $(id).value=''; }); addItem(); updatePreview(); }
 
 function bagKg(size){ if(size==='250g') return .25; if(size==='500g') return .5; if(size==='1kg') return 1; const num=parseFloat(String(size).replace(/[^0-9.]/g,''))||0; return String(size).toLowerCase().includes('kg')?num:num/1000; }
 function formatINR(n){ return Math.round(Number(n)||0).toLocaleString('en-IN'); }
