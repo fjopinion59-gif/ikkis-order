@@ -666,7 +666,28 @@ function showDiag(){ $('diag').classList.add('visible'); }
 async function apiGet(action, params={}){ const url=new URL(getUrl()); url.searchParams.set('action',action); Object.entries(params).forEach(([k,v])=>url.searchParams.set(k, v==null?'':String(v))); diag('GET '+action+(Object.keys(params).length?' '+JSON.stringify(params):'')); const res=await fetch(url.toString(),{method:'GET',redirect:'follow'}); const text=await res.text(); let json; try{json=JSON.parse(text)}catch(e){throw new Error('Apps Script returned non-JSON. Check Web App access/deployment.')} if(json.error) throw new Error(json.error); diag('OK '+action,'ok'); return json; }
 async function testConnection(){ showDiag(); try{ saveUrl(); const data=await apiGet('ping'); updateConnectionStatus('<strong>Connected</strong>IKKIS KOT v2 online','ok'); toast('Connection successful.','ok'); await loadCafes(false); }catch(err){ updateConnectionStatus('<strong>Connection issue</strong>'+err.message.slice(0,60),'err'); toast(err.message,'err'); } }
 
-function selectSource(code){ state.source=code; ['S','W','B'].forEach(c=>$('source'+c).classList.toggle('active',c===code)); $('b2bPanel').classList.toggle('visible',code==='B'); $('formCard').classList.toggle('is-b2b',code==='B'); $('customerLabel').innerHTML=code==='B'?'Café Name <span class="req">*</span>':'Customer Name <span class="req">*</span>'; if(code==='B'&&!state.cafes.length) loadCafes(false); state.orderNo=null; state.orderId='—'; updatePreview(); }
+function selectSource(code){
+  state.source=code;
+  ['S','W','B'].forEach(c=>$('source'+c).classList.toggle('active',c===code));
+  $('b2bPanel').classList.toggle('visible',code==='B');
+  $('formCard').classList.toggle('is-b2b',code==='B');
+  $('customerLabel').innerHTML=code==='B'?'Café Name <span class="req">*</span>':'Customer Name <span class="req">*</span>';
+
+  if(code==='B'&&!state.cafes.length) loadCafes(false);
+
+  // B2B wholesale default: existing blank/default items should move to 1kg.
+  // Manual 500g or already-selected 1kg values are not overwritten.
+  if(code==='B'){
+    state.items.forEach(item=>{
+      if(!item.bagSize || item.bagSize==='250g') item.bagSize='1kg';
+    });
+    renderItems();
+  }
+
+  state.orderNo=null;
+  state.orderId='—';
+  updatePreview();
+}
 function sourceFull(){ if(state.source==='S') return 'S — Shopify B2C'; if(state.source==='W') return 'W — WhatsApp / Phone B2C'; if(state.source==='B') return 'B — B2B Wholesale'; return '—'; }
 async function ensureOrderId(){ if(state.orderNo) return makeOrderId(); try{ const data=await apiGet('nextOrderNum'); state.orderNo=data.next||fallbackOrderNo(); }catch(e){ state.orderNo=fallbackOrderNo(); toast('Using fallback ID.','warn'); } return makeOrderId(); }
 function fallbackOrderNo(){ const d=new Date(); return String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0'); }
@@ -748,7 +769,8 @@ async function submitCafePayment() {
   }
 }
 
-function addItem(){ state.items.push({id:Date.now()+Math.random(), product:'', bagSize:'250g', qty:1, grind:'Whole Beans', notes:'', pricePerKg:'', priceAutoFilled:false}); renderItems(); updatePreview(); }
+function defaultBagSize(){ return state.source==='B' ? '1kg' : '250g'; }
+function addItem(){ state.items.push({id:Date.now()+Math.random(), product:'', bagSize:defaultBagSize(), qty:1, grind:'Whole Beans', notes:'', pricePerKg:'', priceAutoFilled:false}); renderItems(); updatePreview(); }
 function removeItem(id){ state.items=state.items.filter(i=>String(i.id)!==String(id)); renderItems(); updatePreview(); }
 function setItem(id,key,value){ const item=state.items.find(i=>String(i.id)===String(id)); if(!item) return; item[key]=value; if(key==='product'&&state.source==='B'){ const price=lookupCafePrice(value); if(price){ item.pricePerKg=price; item.priceAutoFilled=true; } else { item.pricePerKg=''; item.priceAutoFilled=false; toast('No saved rate found for '+value+' at this café. Enter Rate/Kg manually.','warn'); } } if(key==='pricePerKg') item.priceAutoFilled=false; renderItems(); updatePreview(); }
 function autoFillItemPrices(){ state.items.forEach(item=>{ const price=lookupCafePrice(item.product); if(price){ item.pricePerKg=price; item.priceAutoFilled=true; } }); }
